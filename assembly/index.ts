@@ -2,7 +2,7 @@
 import { PSP32 } from "./psp34/base";
 
 @contract
-class Contract extends PSP32 {
+export class Contract extends PSP32 {
   constructor() {
     super();
   }

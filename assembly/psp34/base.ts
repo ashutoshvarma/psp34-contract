@@ -1,7 +1,11 @@
-import { BytesBuffer } from "as-buffers";
 import {
-  AccountId, Balance, env,
-  FixedArray32, HashKeccak256, Lazy, Mapping, u128
+  AccountId,
+  Balance,
+  env,
+  HashKeccak256,
+  Lazy,
+  Mapping,
+  u128,
 } from "ask-lang";
 import { IBalances } from "../interfaces/balances";
 import { IPSP34 } from "../interfaces/psp34";
@@ -10,22 +14,22 @@ import { CollectionId, Id, Operator, Owner } from "../types";
 @spreadLayout
 export class Balances implements IBalances {
   _total_supply: Lazy<Balance> = instantiate<Lazy<Balance>>();
-  _owned_tokens_count: Mapping<AccountId, u32, HashKeccak256> = new Mapping();
+  _owned_tokens_count: Mapping<AccountId, u128, HashKeccak256> = new Mapping();
 
   constructor() {
     this._total_supply.set(u128.Zero);
   }
 
   @inline
-  balance_of(owner: Owner): u32 {
+  balance_of(owner: Owner): u128 {
     const balance = this._owned_tokens_count.getOrNull(owner);
-    return balance === null ? 0 : balance;
+    return balance === null ? u128.from(0) : balance;
   }
 
   @inline
   increase_balance(owner: Owner, id: Id, increase_supply: bool): void {
-    const to_balance: u32 = this.balance_of(owner);
-    this._owned_tokens_count.set(owner, to_balance + 1);
+    const to_balance: u128 = this.balance_of(owner);
+    this._owned_tokens_count.set(owner, to_balance.preInc());
     if (increase_supply) {
       this._inc_supply();
     }
@@ -33,9 +37,9 @@ export class Balances implements IBalances {
 
   @inline
   decrease_balance(owner: Owner, id: Id, decrease_supply: bool): void {
-    const from_balance: u32 = this.balance_of(owner);
+    const from_balance: u128 = this.balance_of(owner);
     // TODO: check for underflow
-    this._owned_tokens_count.set(owner, from_balance - 1);
+    this._owned_tokens_count.set(owner, from_balance.preDec());
 
     if (decrease_supply) {
       this._dec_supply();
@@ -60,18 +64,6 @@ export class Balances implements IBalances {
   }
 }
 
-// class IdOrAll {
-//   public isAll: bool;
-//   public id: Id | null;
-
-//   constructor(id: Id | null) {
-//     return {
-//       id,
-//       isAll: id === null,
-//     };
-//   }
-// }
-
 @serialize({ omitName: true })
 @deserialize({ omitName: true })
 export class OperatorApproval {
@@ -92,11 +84,15 @@ export class OperatorApproval {
   }
 }
 
+@serialize()
+@deserialize()
+class Empty {}
+
 @spreadLayout
 export class PSP34Data<B extends IBalances = Balances> {
   token_owner: Mapping<Id, Owner, HashKeccak256> = new Mapping();
   // NOTE: id is string
-  operator_approvals: Mapping<OperatorApproval, bool, HashKeccak256> =
+  operator_approvals: Mapping<OperatorApproval, Empty, HashKeccak256> =
     new Mapping();
   balances: B = instantiate<B>();
 }
@@ -117,16 +113,17 @@ export class PSP32 implements IPSP34 {
     // const buffer = String.UTF8.encode(env().accountId<AccountId>().toString());
     // return new FixedArray32(BytesBuffer.wrap(buffer).toStaticArray());
     // return new FixedArray32();
-    throw '';
+    throw "";
   }
 
   @message()
-  balance_of(owner: AccountId): u32 {
+  balance_of(owner: AccountId): u128 {
     return this.data.balances.balance_of(owner);
   }
 
+  // TODO: REMOVING NULL DUE TO COMPILER CRASH.
   @message()
-  owner_of(id: Id): AccountId | null {
+  owner_of(id: Id): AccountId {
     return this._owner_of(id);
   }
 
@@ -180,14 +177,14 @@ export class PSP32 implements IPSP34 {
 
     const operator_approval = new OperatorApproval(caller, to, id);
     if (approved) {
-      this.data.operator_approvals.set(operator_approval, true);
+      this.data.operator_approvals.set(operator_approval, new Empty());
     } else {
       this.data.operator_approvals.delete(operator_approval);
     }
   }
 
-  _owner_of(id: Id): AccountId | null {
-    return this.data.token_owner.getOrNull(id);
+  _owner_of(id: Id): AccountId {
+    return this.data.token_owner.get(id);
   }
 
   _transfer_token(to: AccountId, id: Id, data: Array<u8>): void {
@@ -253,13 +250,11 @@ export class PSP32 implements IPSP34 {
       this.data.operator_approvals.getOrNull(
         new OperatorApproval(owner, operator, null)
       ) !== null;
-
     const approve_id =
       id !== null &&
       this.data.operator_approvals.getOrNull(
         new OperatorApproval(owner, operator, id)
       ) !== null;
-
     return approve_all || approve_id;
   }
 
