@@ -1,8 +1,42 @@
-import { AccountId, env, HashKeccak256, Mapping, u128, IEvent } from "ask-lang";
+import { AccountId, env, HashKeccak256, Mapping, u128 } from "ask-lang";
 import { IBalances } from "../interfaces/balances";
 import { IPSP34 } from "../interfaces/psp34";
 import { CollectionId, Id, Operator, Owner } from "../types";
 import { Balances } from "./balances";
+
+//
+// EVENTS
+//
+
+@event({ id: 1 })
+class TransferEvent {
+  from: AccountId;
+  to: AccountId;
+
+  id: Id;
+
+  constructor(from: AccountId, to: AccountId, id: Id) {
+    this.from = from;
+    this.to = to;
+    this.id = id;
+  }
+}
+
+@event({ id: 2 })
+class ApprovalEvent {
+  from: AccountId;
+  to: AccountId;
+
+  id: string;
+  approved: bool;
+
+  constructor(from: AccountId, to: AccountId, id: string, approved: bool) {
+    this.from = from;
+    this.to = to;
+    this.id = id;
+    this.approved = approved;
+  }
+}
 
 @serialize({ omitName: true })
 @deserialize({ omitName: true })
@@ -84,19 +118,27 @@ export class PSP32 implements IPSP34 {
     return this.data.balances.total_supply();
   }
 
-  _emit_transfer_event(
-    _from: AccountId | null,
-    _to: AccountId | null,
-    _id: Id
-  ): void {
-    // env().emitEvent(new TransferEvent(_from, _to, _id));
+  _emit_transfer_event(_from: AccountId, _to: AccountId, _id: Id): void {
+    // @ts-ignore
+    env().emitEvent(new TransferEvent(_from, _to, _id));
   }
 
   _emit_approval_event(
     _from: AccountId,
     _to: AccountId,
-    _id: Id | null
-  ): void {}
+    _id: Id | null,
+    _approved: bool
+  ): void {
+    env().emitEvent(
+      // @ts-ignore
+      new ApprovalEvent(
+        _from,
+        _to,
+        _id === null ? "" : _id.toString(),
+        _approved
+      )
+    );
+  }
 
   _approve_for(to: AccountId, id: Id | null, approved: bool): void {
     let caller = env().caller<AccountId>();
@@ -121,6 +163,8 @@ export class PSP32 implements IPSP34 {
     } else {
       this.data.operator_approvals.delete(operator_approval);
     }
+
+    this._emit_approval_event(caller, to, id, approved);
   }
 
   _owner_of(id: Id): AccountId {
@@ -170,8 +214,8 @@ export class PSP32 implements IPSP34 {
 
     this.data.balances.increase_balance(to, id, true);
     this.data.token_owner.set(id, to);
-    this._after_token_transfer(null, to, id);
-    this._emit_transfer_event(null, to, id);
+    this._after_token_transfer(new AccountId(), to, id);
+    this._emit_transfer_event(new AccountId(), to, id);
   }
 
   _burn_from(from: AccountId, id: Id): void {
@@ -181,8 +225,8 @@ export class PSP32 implements IPSP34 {
 
     this.data.token_owner.delete(id);
     this.data.balances.decrease_balance(from, id, true);
-    this._after_token_transfer(from, null, id);
-    this._emit_transfer_event(from, null, id);
+    this._after_token_transfer(from, new AccountId(), id);
+    this._emit_transfer_event(from, new AccountId(), id);
   }
 
   _allowance(owner: Owner, operator: Operator, id: Id | null): bool {

@@ -10,3 +10,4 @@ PSP32
 2. balance_of(), instead of u32 we have u128.
 3. No Errors
 4. not implemented _do_safe_transfer_check, no cross-call in ask! v0.4.0
+5. no `null` allowed in methods arguments, no null in metadata generated, so approval cannot take null as input.
