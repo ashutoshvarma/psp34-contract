@@ -4,3 +4,14 @@ assembly/**/__tests__/*.wat
 node_modules/
 assembly/**/__tests__/*.map
 assembly/**/__tests__/*.wat
+
+# https://yarnpkg.com/getting-started/qa/#which-files-should-be-gitignored
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+build/*
+!build/.gitignore

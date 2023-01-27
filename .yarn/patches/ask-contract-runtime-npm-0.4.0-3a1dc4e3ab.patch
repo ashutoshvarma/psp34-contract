@@ -1,0 +1,15 @@
+diff --git a/assembly/unstable.ts b/assembly/unstable.ts
+index f6f0df7b04fe6ffebd306307d64e814df59ea0af..a0dc9c73c544620d35ec1d37b7c088ced8cee30b 100644
+--- a/assembly/unstable.ts
++++ b/assembly/unstable.ts
+@@ -31,8 +31,8 @@ export declare function seal_take_storage(
+ // Returns the size of the pre-existing value at the specified key if any. Otherwise
+ // `SENTINEL` is returned as a sentinel value.
+ // @ts-ignore
+-@external("__unstable__", "seal_clear_storage")
+-export declare function seal_clear_storage(keyPtr: Ptr): Size;
++// @external("__unstable__", "seal_clear_storage")
++// export declare function seal_clear_storage(keyPtr: Ptr): Size;
+ 
+ // Make a call to another contract.
+ //

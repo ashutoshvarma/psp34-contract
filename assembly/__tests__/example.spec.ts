@@ -1,9 +1,26 @@
+import { AccountId } from "ask-lang";
+import { PSP32 } from "../psp34/base";
+import { Id } from "../types";
 
-import { Flipper } from "..";
+@contract
+export class Contract extends PSP32 {
+  constructor() {
+    super();
+  }
 
+  @constructor()
+  defualt(): void {
+    super.default();
+  }
+
+  @message({ mutates: true })
+  mint(to: AccountId, id: Id): void {
+    this._mint_to(to, id);
+  }
+}
 describe("test add", () => {
   it("19 + 13 should be 42", () => {
-    const _a = new Flipper(false);
+    const _a = new Contract();
   });
 
   it("can log some values to the console", () => {

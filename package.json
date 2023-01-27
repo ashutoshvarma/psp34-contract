@@ -9,19 +9,23 @@
     "build": "npm run build:untouched && npm run build:optimized"
   },
   "devDependencies": {
+    "@as-pect/cli": "^6",
     "@typescript-eslint/eslint-plugin": "^4.22.0",
     "@typescript-eslint/parser": "^4.22.0",
+    "asbuild": "ashutoshvarma/asbuild",
     "ask-transform": "^0.4.0",
     "assemblyscript": "^0.19",
-    "asbuild": "ashutoshvarma/asbuild",
     "eslint": "^7.17.0",
-    "typescript": "^4.3.5",
-    "@as-pect/cli": "^6"
+    "typescript": "^4.3.5"
   },
   "dependencies": {
-    "as-container": "^0.6.1",
+    "@assemblyscript/loader": "^0.18.7",
     "as-buffers": "^0.1.3",
-    "ask-lang": "^0.4.0",
-    "@assemblyscript/loader": "^0.18.7"
+    "as-container": "^0.6.1",
+    "ask-lang": "^0.4.0"
+  },
+  "packageManager": "yarn@3.3.1",
+  "resolutions": {
+    "ask-contract-runtime@0.4.0": "patch:ask-contract-runtime@npm%3A0.4.0#./.yarn/patches/ask-contract-runtime-npm-0.4.0-3a1dc4e3ab.patch"
   }
 }
