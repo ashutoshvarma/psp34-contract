@@ -15,7 +15,7 @@ import { PSP34 } from "../base";
  * Balances implementation for enumerable extension
  */
 @spreadLayout
-export class Balances implements IBalances {
+export class EnumerableBalances implements IBalances {
   // Array with all token ids, used for enumeration
   _all_tokens: Vector<Id> = new Vector();
   // Mapping from token id to position in the allTokens array
@@ -148,7 +148,7 @@ export class Balances implements IBalances {
  */
 @contract
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export class PSP34Enumerable extends PSP34<Balances> {
+export class PSP34Enumerable extends PSP34<EnumerableBalances> {
   constructor() {
     super();
   }

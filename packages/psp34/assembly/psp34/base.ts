@@ -113,6 +113,7 @@ export class PSP34Data<B extends IBalances = Balances> {
  * PSP34 Base Contract (NOTE: Not comepletely conforms to spec due to ask! limitations)
  */
 @contract
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export class PSP34<B extends IBalances = Balances> implements IPSP34 {
   protected data: PSP34Data<B>;
 

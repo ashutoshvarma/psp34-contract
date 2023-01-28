@@ -1,30 +1,23 @@
 {
-  "scripts": {
-    "lint:fix": "asb fmt \"assembly/**/*.ts\"",
-    "lint": "asb fmt \"assembly/**/*.ts\" --lint",
-    "test": "asb test -- --verbose",
-    "test:ci": "asb test -- --summary",
-    "build:untouched": "ASK_CONFIG=./askconfig.json asb assembly/index.ts --target debug --verbose",
-    "build:optimized": "ASK_CONFIG=./askconfig.json asb assembly/index.ts --target release",
-    "build": "npm run build:untouched && npm run build:optimized"
-  },
-  "devDependencies": {
-    "@as-pect/cli": "^6",
-    "@typescript-eslint/eslint-plugin": "^4.22.0",
-    "@typescript-eslint/parser": "^4.22.0",
-    "asbuild": "ashutoshvarma/asbuild",
-    "ask-transform": "^0.4.0",
-    "assemblyscript": "^0.19",
-    "eslint": "^7.17.0",
-    "typescript": "^4.3.5"
-  },
-  "dependencies": {
-    "@assemblyscript/loader": "^0.18.7",
-    "as-buffers": "^0.1.3",
-    "as-container": "^0.6.1",
-    "ask-lang": "^0.4.0"
-  },
+  "name": "ask-psp34",
+  "version": "0.1.0",
   "packageManager": "yarn@3.3.1",
+  "private": true,
+  "scripts": {
+    "clean": "yarn workspaces foreach -pt run clean",
+    "build": "yarn workspaces foreach -pt run build",
+    "lint": "yarn workspaces foreach -pt run lint",
+    "lint:fix": "yarn workspaces foreach -pt run lint:fix"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "prettier": {
+    "trailingComma": "all",
+    "tabWidth": 2,
+    "semi": true,
+    "singleQuote": true
+  },
   "resolutions": {
     "ask-contract-runtime@0.4.0": "patch:ask-contract-runtime@npm%3A0.4.0#./.yarn/patches/ask-contract-runtime-npm-0.4.0-3a1dc4e3ab.patch",
     "ask-lang@^0.4.0": "patch:ask-lang@npm%3A0.4.0#./.yarn/patches/ask-lang-npm-0.4.0-830b1190bb.patch"

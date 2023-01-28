@@ -1,3 +1,8 @@
+export * from "./psp34";
+export * from "./types";
+export * from "./interfaces";
+
+
 // import { ERC20 } from "./erc721";
 import { AccountId } from "ask-lang";
 import { PSP34 } from "./psp34/base";
