@@ -7,4 +7,5 @@ export interface IBalances {
   increase_balance(owner: AccountId, id: Id, increase_supply: bool): void;
   decrease_balance(owner: AccountId, id: Id, decrease_supply: bool): void;
   total_supply(): Balance;
+  before_token_transfer(from: AccountId, to: AccountId, id: u128): void;
 }

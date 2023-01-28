@@ -17,6 +17,8 @@ export class Balances implements IBalances {
   constructor() {
     this._total_supply.set(u128.Zero);
   }
+  
+  before_token_transfer(_from: AccountId, _to: AccountId, _id: u128): void {}
 
   @inline
   balance_of(owner: Owner): u128 {
