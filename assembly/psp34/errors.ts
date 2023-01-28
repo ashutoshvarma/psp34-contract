@@ -1,7 +1,3 @@
-import { Result } from "as-container";
-
-Result;
-
 export class PSP34Result {
   public ok: bool;
   public error: string;

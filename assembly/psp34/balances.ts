@@ -9,15 +9,21 @@ import {
 import { IBalances } from "../interfaces/balances";
 import { Id, Owner } from "../types";
 
+
+// Balances implementation for Base PSP34 
 @spreadLayout
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export class Balances implements IBalances {
+  // total tokens
   _total_supply: Lazy<Balance> = instantiate<Lazy<Balance>>();
+  // total tokens per account
   _owned_tokens_count: Mapping<AccountId, u128, HashKeccak256> = new Mapping();
 
   constructor() {
     this._total_supply.set(u128.Zero);
   }
-  
+
+  after_token_transfer(from: AccountId, to: AccountId, id: u128): void {}
   before_token_transfer(_from: AccountId, _to: AccountId, _id: u128): void {}
 
   @inline

@@ -1,6 +1,5 @@
 import { AccountId, Balance, u128 } from "ask-lang";
 import { CollectionId, Id } from "../types";
-import { SOption } from "../utils/option";
 
 // export interface IPSP34 extends IContract, SpreadLayout {
 export interface IPSP34 {

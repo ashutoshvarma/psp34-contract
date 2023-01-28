@@ -1,17 +1,15 @@
-import { BytesBuffer } from "as-buffers";
 import {
   AccountId,
   env,
   HashKeccak256,
   Mapping,
-  Pack,
   u128,
   ZERO_ACCOUNT,
 } from "ask-lang";
 import { IBalances } from "../interfaces/balances";
 import { IPSP34 } from "../interfaces/psp34";
 import { CollectionId, Id, Operator, Owner } from "../types";
-// import { SOption } from "../utils/option";
+// import { Option } from "../utils/option";
 import { Balances } from "./balances";
 
 //
@@ -86,7 +84,7 @@ export class AttributeKey {
 @deserialize()
 class Empty {}
 
-// // as-serde-scale failed to encode/decode builtin types
+// // as-serde-scale fails to encode/decode builtin types
 // // that has no default constructor arguments.
 // class _Uint8Array extends Uint8Array {
 //   constructor(len: i32 = 0) {
@@ -94,17 +92,26 @@ class Empty {}
 //   }
 // }
 
+//
+// PSP34 Base Contract Storage
+//
 @spreadLayout
 export class PSP34Data<B extends IBalances = Balances> {
+  // mapping of token Id to token owner
   token_owner: Mapping<Id, Owner, HashKeccak256> = new Mapping();
-  // NOTE: id is string
+  // mapping of approvals tuple, interanlly saves `Id` as string
   operator_approvals: Mapping<OperatorApproval, Empty, HashKeccak256> =
     new Mapping();
 
+  // sttributes-key mapping
   attributes: Mapping<AttributeKey, Array<u8>, HashKeccak256> = new Mapping();
+  // balances instance
   balances: B = instantiate<B>();
 }
 
+/**
+ * PSP34 Base Contract (NOTE: Not comepletely conforms to spec due to ask! limitations)
+ */
 @contract
 export class PSP34<B extends IBalances = Balances> implements IPSP34 {
   protected data: PSP34Data<B>;
@@ -116,59 +123,108 @@ export class PSP34<B extends IBalances = Balances> implements IPSP34 {
   @constructor()
   default(): void {}
 
+  /**
+   * Gives the collection id of contract
+   * @returns CollectionId (AccountId)
+   */
   @message()
   collection_id(): CollectionId {
     return env().accountId<AccountId>();
   }
 
+  /**
+   * Get the metadata attributes for given id
+   * @note supports only u128 type of Ids
+   * @returns Bytes Array of attributes
+   */
   @message()
   get_attribute(id: Id, key: Array<u8>): Array<u8> {
     const attr = this.data.attributes.getOrNull(new AttributeKey(id, key));
     return attr === null ? [] : attr;
   }
 
+  /**
+   * Get the metadata attributes for collection
+   * @note Not part of PSP34 spec
+   * @returns Bytes Array of attributes
+   */
   @message()
   get_collection_attribute(key: Array<u8>): Array<u8> {
     const attr = this.data.attributes.getOrNull(new AttributeKey(null, key));
     return attr === null ? [] : attr;
   }
 
+  /**
+   * Gets token balance of account.
+   */
   @message()
   balance_of(owner: AccountId): u128 {
     return this.data.balances.balance_of(owner);
   }
 
-  // TODO: REMOVING NULL DUE TO COMPILER CRASH.
+  /**
+   * Gets owner of given token Id. If id not exists or burned
+   * returns ZERO ADDRESS
+   */
   @message()
   owner_of(id: Id): AccountId {
     return this._owner_of(id);
   }
 
+  /**
+   * Check for operator priviledges for given operator for given token
+   * @param owner owner account
+   * @param operator operator account
+   * @param id token id
+   */
   @message()
   allowance(owner: AccountId, operator: AccountId, id: u128): bool {
     return this._allowance(owner, operator, id);
   }
 
+  /**
+   * Approve the operator for managing given token id.
+   * @param operator operatot account
+   * @param id token id
+   * @param approved enable or disbale allowance
+   */
   @message({ mutates: true })
   approve(operator: AccountId, id: u128, approved: bool): void {
     return this._approve_for(operator, id, approved);
   }
 
+  /**
+   * Check for operator priviledges for given operator for all tokens
+   * @note Not part of PSP34 spec
+   */
   @message()
   allowance_all(owner: AccountId, operator: AccountId): bool {
     return this._allowance(owner, operator, null);
   }
 
+  /**
+   * Approve the operator for all tokens
+   * @note Not part of PSP34 spec
+   */
   @message({ mutates: true })
   approve_all(operator: AccountId, approved: bool): void {
     return this._approve_for(operator, null, approved);
   }
 
+  /**
+   * Transfer the given token id
+   * @param to account of reciever
+   * @param id token id to transfer
+   * @param data data (if any) to pass to reciever (if supports)
+   */
   @message({ mutates: true })
   transfer(to: AccountId, id: u128, data: Uint8Array): void {
     this._transfer_token(to, id, data);
   }
 
+  /**
+   * Total tokens count
+   */
   @message()
   total_supply(): u128 {
     return this.data.balances.total_supply();
@@ -321,5 +377,7 @@ export class PSP34<B extends IBalances = Balances> implements IPSP34 {
     this.data.balances.before_token_transfer(from, to, id);
   }
 
-  _after_token_transfer(_from: AccountId, _to: AccountId, _id: Id): void {}
+  _after_token_transfer(from: AccountId, to: AccountId, id: Id): void {
+    this.data.balances.after_token_transfer(from, to, id);
+  }
 }
