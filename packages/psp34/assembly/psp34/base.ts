@@ -1,3 +1,4 @@
+import { ScaleSerializer } from "as-serde-scale";
 import {
   AccountId,
   env,
@@ -130,7 +131,7 @@ export class PSP34<B extends IBalances = Balances> implements IPSP34 {
    */
   @message()
   collection_id(): CollectionId {
-    return env().accountId<AccountId>();
+    return ScaleSerializer.serialize<AccountId>(env().accountId<AccountId>());
   }
 
   /**

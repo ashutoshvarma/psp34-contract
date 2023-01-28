@@ -426,7 +426,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"as-serde-scale@npm:^0.2":
+"as-serde-scale@npm:^0.2, as-serde-scale@npm:^0.2.0":
   version: 0.2.0
   resolution: "as-serde-scale@npm:0.2.0"
   dependencies:
@@ -1557,6 +1557,7 @@ asbuild@ashutoshvarma/asbuild:
     "@typescript-eslint/parser": ^4.22.0
     as-buffers: ^0.1.3
     as-container: ^0.6.1
+    as-serde-scale: ^0.2.0
     asbuild: ashutoshvarma/asbuild
     ask-lang: ^0.4.0
     ask-transform: ^0.4.0
