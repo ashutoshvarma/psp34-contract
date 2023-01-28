@@ -14,7 +14,7 @@ export class Contract extends PSP34 {
   }
 
   @constructor()
-  defualt(): void {
+  default(): void {
     super.default();
 
     // TODO: ask! has no counterpart for `ink_lang::codegen::initialize_contract`
