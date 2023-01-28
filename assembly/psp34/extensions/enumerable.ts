@@ -1,12 +1,19 @@
 import {
   AccountId,
   Balance,
-  HashKeccak256, Mapping, u128, Vector, ZERO_ACCOUNT
+  HashKeccak256,
+  Mapping,
+  u128,
+  Vector,
+  ZERO_ACCOUNT,
 } from "ask-lang";
 import { IBalances } from "../../interfaces/balances";
 import { Id, Owner } from "../../types";
 import { PSP34 } from "../base";
 
+/**
+ * Balances implementation for enumerable extension
+ */
 @spreadLayout
 export class Balances implements IBalances {
   // Array with all token ids, used for enumeration
@@ -15,8 +22,8 @@ export class Balances implements IBalances {
   _all_tokens_index: Mapping<Id, u128, HashKeccak256> = new Mapping();
 
   // Mapping from owner to list of owned token IDs
-  // NOTE: usig u32 here, which is bad but still using because
-  //       using u128 causes some weird read errors from Map
+  // NOTE: using u32 here, which is bad but still using because
+  //       u128 causes some weird read errors from Map
   //       possibly because of (de)serialization.
   _owned_tokens: Mapping<AccountId, Map<u32, Id>, HashKeccak256> =
     new Mapping();
@@ -51,6 +58,7 @@ export class Balances implements IBalances {
     return u128.from(this._all_tokens.length);
   }
 
+  @inline
   before_token_transfer(from: AccountId, to: AccountId, id: u128): void {
     if (from === ZERO_ACCOUNT) {
       this._add_token_to_all_list(id);
@@ -64,6 +72,9 @@ export class Balances implements IBalances {
       this._add_token_to_owner_lists(to, id);
     }
   }
+
+  @inline
+  after_token_transfer(_from: AccountId, _to: AccountId, _id: u128): void {}
 
   // _owned_tokens[owner]
   _get_tokens_map(owner: AccountId): Map<u32, Id> {
@@ -132,7 +143,11 @@ export class Balances implements IBalances {
   }
 }
 
+/**
+ * PSP34 Enumerable Extnesion (NOTE: Not comepletely conforms to spec due to ask! limitations)
+ */
 @contract
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export class PSP34Enumerable extends PSP34<Balances> {
   constructor() {
     super();
@@ -143,15 +158,30 @@ export class PSP34Enumerable extends PSP34<Balances> {
     super.default();
   }
 
+  /**
+   * Gets the token by index for an account.
+   * @param owner token owner
+   * @param idx token index
+   * @returns token id
+   */
   @message()
-  owners_token_by_index(owner: AccountId, idx: u128): Balance {
-    // TODO: ERROR handling
-    return this.data.balances._owned_tokens.get(owner).get(idx.toU32());
+  owners_token_by_index(owner: AccountId, idx: u32): Balance {
+    if (u128.from(idx) >= this.balance_of(owner)) {
+      throw `PSP34Error::TokenNotExists`;
+    }
+    return this.data.balances._owned_tokens.get(owner).get(idx);
   }
 
+  /**
+   * Gets the token by index
+   * @param idx token index
+   * @returns token id
+   */
   @message()
-  token_by_index(index: Id): Id {
-    // TODO: ERROR handling
-    return this.data.balances._all_tokens.get(index.toU32());
+  token_by_index(idx: u32): Id {
+    if (u128.from(idx) >= this.total_supply()) {
+      throw `PSP34Error::TokenNotExists`;
+    }
+    return this.data.balances._all_tokens.get(idx);
   }
 }
