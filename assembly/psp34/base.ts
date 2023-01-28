@@ -1,7 +1,17 @@
-import { AccountId, env, HashKeccak256, Mapping, u128 } from "ask-lang";
+import { BytesBuffer } from "as-buffers";
+import {
+  AccountId,
+  env,
+  HashKeccak256,
+  Mapping,
+  Pack,
+  u128,
+  ZERO_ACCOUNT,
+} from "ask-lang";
 import { IBalances } from "../interfaces/balances";
 import { IPSP34 } from "../interfaces/psp34";
 import { CollectionId, Id, Operator, Owner } from "../types";
+// import { SOption } from "../utils/option";
 import { Balances } from "./balances";
 
 //
@@ -58,9 +68,31 @@ export class OperatorApproval {
   }
 }
 
+@serialize({ omitName: true })
+@deserialize({ omitName: true })
+export class AttributeKey {
+  static OPERATOR_ID: string = "";
+
+  public key: Array<u8>;
+  _id: string;
+
+  constructor(id: Id | null, key: Array<u8>) {
+    this.key = key;
+    this._id = id === null ? AttributeKey.OPERATOR_ID : id.toString();
+  }
+}
+
 @serialize()
 @deserialize()
 class Empty {}
+
+// // as-serde-scale failed to encode/decode builtin types
+// // that has no default constructor arguments.
+// class _Uint8Array extends Uint8Array {
+//   constructor(len: i32 = 0) {
+//     super(len);
+//   }
+// }
 
 @spreadLayout
 export class PSP34Data<B extends IBalances = Balances> {
@@ -68,12 +100,14 @@ export class PSP34Data<B extends IBalances = Balances> {
   // NOTE: id is string
   operator_approvals: Mapping<OperatorApproval, Empty, HashKeccak256> =
     new Mapping();
+
+  attributes: Mapping<AttributeKey, Array<u8>, HashKeccak256> = new Mapping();
   balances: B = instantiate<B>();
 }
 
 @contract
-export class PSP32 implements IPSP34 {
-  private data: PSP34Data<Balances>;
+export class PSP34<B extends IBalances = Balances> implements IPSP34 {
+  protected data: PSP34Data<B>;
 
   constructor() {
     this.data = new PSP34Data();
@@ -88,6 +122,18 @@ export class PSP32 implements IPSP34 {
   }
 
   @message()
+  get_attribute(id: Id, key: Array<u8>): Array<u8> {
+    const attr = this.data.attributes.getOrNull(new AttributeKey(id, key));
+    return attr === null ? [] : attr;
+  }
+
+  @message()
+  get_collection_attribute(key: Array<u8>): Array<u8> {
+    const attr = this.data.attributes.getOrNull(new AttributeKey(null, key));
+    return attr === null ? [] : attr;
+  }
+
+  @message()
   balance_of(owner: AccountId): u128 {
     return this.data.balances.balance_of(owner);
   }
@@ -99,17 +145,27 @@ export class PSP32 implements IPSP34 {
   }
 
   @message()
-  allowance(owner: AccountId, operator: AccountId, id: u128 | null): bool {
+  allowance(owner: AccountId, operator: AccountId, id: u128): bool {
     return this._allowance(owner, operator, id);
   }
 
   @message({ mutates: true })
-  approve(operator: AccountId, id: u128 | null, approved: bool): void {
+  approve(operator: AccountId, id: u128, approved: bool): void {
     return this._approve_for(operator, id, approved);
   }
 
+  @message()
+  allowance_all(owner: AccountId, operator: AccountId): bool {
+    return this._allowance(owner, operator, null);
+  }
+
   @message({ mutates: true })
-  transfer(to: AccountId, id: u128, data: Array<u8>): void {
+  approve_all(operator: AccountId, approved: bool): void {
+    return this._approve_for(operator, null, approved);
+  }
+
+  @message({ mutates: true })
+  transfer(to: AccountId, id: u128, data: Uint8Array): void {
     this._transfer_token(to, id, data);
   }
 
@@ -138,6 +194,17 @@ export class PSP32 implements IPSP34 {
         _approved
       )
     );
+  }
+
+  _emit_attribute_set_event(
+    _id: Id | null,
+    key: Array<u8>,
+    _data: Array<u8>
+  ): void {}
+
+  _set_attribute(id: Id | null, key: Array<u8>, value: Array<u8>): void {
+    this.data.attributes.set(new AttributeKey(id, key), value);
+    this._emit_attribute_set_event(id, key, value);
   }
 
   _approve_for(to: AccountId, id: Id | null, approved: bool): void {
@@ -171,7 +238,7 @@ export class PSP32 implements IPSP34 {
     return this.data.token_owner.get(id);
   }
 
-  _transfer_token(to: AccountId, id: Id, data: Array<u8>): void {
+  _transfer_token(to: AccountId, id: Id, data: Uint8Array): void {
     const owner = this._check_token_exists(id);
     const caller = env().caller<AccountId>();
 
@@ -201,7 +268,7 @@ export class PSP32 implements IPSP34 {
     from: AccountId,
     to: AccountId,
     id: Id,
-    data: Array<u8>
+    data: Uint8Array
   ): void {
     // TODO: implement
   }
@@ -210,23 +277,23 @@ export class PSP32 implements IPSP34 {
     if (this.data.token_owner.getOrNull(id) !== null) {
       throw "PSP34Error::TokenExists";
     }
-    this._before_token_transfer(null, to, id);
+    this._before_token_transfer(ZERO_ACCOUNT, to, id);
 
     this.data.balances.increase_balance(to, id, true);
     this.data.token_owner.set(id, to);
-    this._after_token_transfer(new AccountId(), to, id);
-    this._emit_transfer_event(new AccountId(), to, id);
+    this._after_token_transfer(ZERO_ACCOUNT, to, id);
+    this._emit_transfer_event(ZERO_ACCOUNT, to, id);
   }
 
   _burn_from(from: AccountId, id: Id): void {
     this._check_token_exists(id);
 
-    this._before_token_transfer(from, null, id);
+    this._before_token_transfer(from, ZERO_ACCOUNT, id);
 
     this.data.token_owner.delete(id);
     this.data.balances.decrease_balance(from, id, true);
-    this._after_token_transfer(from, new AccountId(), id);
-    this._emit_transfer_event(from, new AccountId(), id);
+    this._after_token_transfer(from, ZERO_ACCOUNT, id);
+    this._emit_transfer_event(from, ZERO_ACCOUNT, id);
   }
 
   _allowance(owner: Owner, operator: Operator, id: Id | null): bool {
@@ -250,15 +317,9 @@ export class PSP32 implements IPSP34 {
     return owner;
   }
 
-  _before_token_transfer(
-    _from: AccountId | null,
-    _to: AccountId | null,
-    _id: Id
-  ): void {}
+  _before_token_transfer(from: AccountId, to: AccountId, id: Id): void {
+    this.data.balances.before_token_transfer(from, to, id);
+  }
 
-  _after_token_transfer(
-    _from: AccountId | null,
-    _to: AccountId | null,
-    _id: Id
-  ): void {}
+  _after_token_transfer(_from: AccountId, _to: AccountId, _id: Id): void {}
 }

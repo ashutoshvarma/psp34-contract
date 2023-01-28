@@ -1,5 +1,6 @@
 import { AccountId, Balance, u128 } from "ask-lang";
 import { CollectionId, Id } from "../types";
+import { SOption } from "../utils/option";
 
 // export interface IPSP34 extends IContract, SpreadLayout {
 export interface IPSP34 {
@@ -10,11 +11,15 @@ export interface IPSP34 {
 
   owner_of(token_id: Id): AccountId;
 
-  allowance(owner: AccountId, operator: AccountId, id: Id | null): bool;
+  allowance(owner: AccountId, operator: AccountId, id: Id): bool;
 
-  approve(to: AccountId, id: Id | null, approved: bool): void;
+  approve(to: AccountId, id: Id, approved: bool): void;
 
-  transfer(to: AccountId, id: Id, data: Array<u8>): void;
+  allowance_all(owner: AccountId, operator: AccountId): bool;
+
+  approve_all(to: AccountId, approved: bool): void;
+
+  transfer(to: AccountId, id: Id, data: Uint8Array): void;
 
   total_supply(): Balance;
 }
