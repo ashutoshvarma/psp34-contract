@@ -1,0 +1,24 @@
+{
+  "name": "example",
+  "packageManager": "yarn@3.3.1",
+  "scripts": {
+    "lint:fix": "asb fmt \"assembly/**/*.ts\"",
+    "lint": "asb fmt \"assembly/**/*.ts\" --lint",
+    "build": "ASK_CONFIG=./askconfig.json asb --target release",
+    "debug": "DEBUG=* ASK_CONFIG=./askconfig.json asb --target release"
+  },
+  "devDependencies": {
+    "@as-pect/cli": "^6",
+    "@typescript-eslint/eslint-plugin": "^4.22.0",
+    "@typescript-eslint/parser": "^4.22.0",
+    "asbuild": "ashutoshvarma/asbuild",
+    "ask-transform": "^0.4.0",
+    "assemblyscript": "^0.19",
+    "eslint": "^7.17.0",
+    "typescript": "^4.3.5"
+  },
+  "dependencies": {
+    "ask-lang": "^0.4.0",
+    "psp34-contract": "workspace:*"
+  }
+}

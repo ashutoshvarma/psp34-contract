@@ -1,0 +1,13 @@
+{
+  "extends": "ask-lang/asconfig.json",
+  "targets": {
+      "debug": {
+          "binaryFile": "build/debug.wasm",
+          "textFile": "build/debug.wat"
+      },
+      "release": {
+          "binaryFile": "build/release.wasm",
+          "textFile": "build/release.wat"
+      }
+  }
+}
