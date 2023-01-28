@@ -1,0 +1,244 @@
+diff --git a/assembly/collections/vector.ts b/assembly/collections/vector.ts
+index 3786d4711ebb61f1410fcee4f07d43fd3a80277d..118d44630df5b712ded01d58cb2a1832d6ef70dc 100644
+--- a/assembly/collections/vector.ts
++++ b/assembly/collections/vector.ts
+@@ -9,127 +9,132 @@ import { LazyIndexMap } from "./lazyIndexMap";
+  */
+ @final
+ export class Vector<T> implements SpreadLayout {
+-    protected _len: u32 = 0;
+-    protected _elems: LazyIndexMap<T> = new LazyIndexMap<T>();
++  protected _len: u32 = 0;
++  protected _elems: LazyIndexMap<T> = new LazyIndexMap<T>();
+ 
+-    // eslint-disable-next-line @typescript-eslint/no-empty-function
+-    constructor() {}
++  // eslint-disable-next-line @typescript-eslint/no-empty-function
++  constructor() {}
+ 
+-    get length(): u32 {
+-        return this._len;
+-    }
++  get length(): u32 {
++    return this._len;
++  }
+ 
+-    /**
+-     * The vector length.
+-     */
+-    private set length(len: u32) {
+-        this._len = len;
+-    }
++  /**
++   * The vector length.
++   */
++  private set length(len: u32) {
++    this._len = len;
++  }
+ 
+-    /**
+-     * Get the element at given index.
+-     * @param index
+-     * @returns
+-     */
+-    get(index: u32): T {
+-        assert(this.length > index);
+-        return this._elems.get(index);
+-    }
++  /**
++   * Get the element at given index.
++   * @param index
++   * @returns
++   */
++  get(index: u32): T {
++    assert(this.length > index);
++    return this._elems.get(index);
++  }
+ 
+-    /**
+-     * Set the element at given index.
+-     * @param index
+-     * @param value
+-     */
+-    set(index: u32, value: T): void {
+-        assert(this.length > index);
+-        this._elems.set(index, value);
+-    }
++  /**
++   * Set the element at given index.
++   * @param index
++   * @param value
++   */
++  set(index: u32, value: T): void {
++    assert(this.length > index);
++    this._elems.set(index, value);
++  }
+ 
+-    /**
+-     * Returns true if the length is zero.
+-     * @returns
+-     */
+-    isEmpty(): bool {
+-        return this.length == 0;
+-    }
++  delete(index: u32): void {
++    assert(this.length > index);
++    this._elems.delete(index);
++  }
+ 
+-    /**
+-     * Clear all elements and set length to zero.
+-     * @returns
+-     */
+-    clear(): void {
+-        if (this.isEmpty()) {
+-            return;
+-        }
+-        const len: u32 = this.length;
+-        for (let i: u32 = 0; i < len; i++) {
+-            this._elems.deleteAt(i);
+-        }
+-        this.length = 0;
+-    }
++  /**
++   * Returns true if the length is zero.
++   * @returns
++   */
++  isEmpty(): bool {
++    return this.length == 0;
++  }
+ 
+-    /**
+-     * Push a element to the last.
+-     * @param value
+-     * @returns
+-     */
+-    @inline
+-    push(value: T): u32 {
+-        this._elems.set(this.length, value);
+-        this.length = this.length + 1;
+-        return this.length;
++  /**
++   * Clear all elements and set length to zero.
++   * @returns
++   */
++  clear(): void {
++    if (this.isEmpty()) {
++      return;
+     }
+-
+-    /**
+-     * Pop the last element and return it.
+-     * @returns
+-     */
+-    @inline
+-    pop(): T {
+-        assert(!this.isEmpty());
+-        this.length = this.length - 1;
+-        return this._elems.remove(this.length);
++    const len: u32 = this.length;
++    for (let i: u32 = 0; i < len; i++) {
++      this._elems.deleteAt(i);
+     }
++    this.length = 0;
++  }
+ 
+-    /**
+-     * Pop the last element.
+-     */
+-    @inline
+-    removeLast(): void {
+-        assert(!this.isEmpty());
+-        this.length = this.length - 1;
+-        this._elems.delete(this.length);
+-    }
++  /**
++   * Push a element to the last.
++   * @param value
++   * @returns
++   */
++  @inline
++  push(value: T): u32 {
++    this._elems.set(this.length, value);
++    this.length = this.length + 1;
++    return this.length;
++  }
+ 
+-    pullSpread<K extends IKey>(key: K): void {
+-        // @ts-ignore
+-        this._len = pullSpread<u32, K>(key);
+-        this._elems.pullSpread<K>(key);
+-    }
++  /**
++   * Pop the last element and return it.
++   * @returns
++   */
++  @inline
++  pop(): T {
++    assert(!this.isEmpty());
++    this.length = this.length - 1;
++    return this._elems.remove(this.length);
++  }
+ 
+-    pushSpread<K extends IKey>(key: K): void {
+-        // @ts-ignore
+-        pushSpread<u32, K>(this._len, key);
+-        this._elems.pushSpread<K>(key);
+-    }
++  /**
++   * Pop the last element.
++   */
++  @inline
++  removeLast(): void {
++    assert(!this.isEmpty());
++    this.length = this.length - 1;
++    this._elems.delete(this.length);
++  }
+ 
+-    protected clearAll(): void {
+-        if (this._elems.key() === null) {
+-            // We won't clear any storage if we are in lazy state since there
+-            // probably has not been any state written to storage, yet.
+-            return;
+-        }
+-        const len: u32 = this.length;
+-        for (let i: u32 = 0; i < len; i++) {
+-            this._elems.clearAt(i);
+-        }
+-    }
++  pullSpread<K extends IKey>(key: K): void {
++    // @ts-ignore
++    this._len = pullSpread<u32, K>(key);
++    this._elems.pullSpread<K>(key);
++  }
+ 
+-    clearSpread<K extends IKey>(key: K): void {
+-        this.clearAll();
+-        // @ts-ignore
+-        clearSpread<u32, K>(this._len, key);
+-        this._elems.clearSpread<K>(key);
++  pushSpread<K extends IKey>(key: K): void {
++    // @ts-ignore
++    pushSpread<u32, K>(this._len, key);
++    this._elems.pushSpread<K>(key);
++  }
++
++  protected clearAll(): void {
++    if (this._elems.key() === null) {
++      // We won't clear any storage if we are in lazy state since there
++      // probably has not been any state written to storage, yet.
++      return;
++    }
++    const len: u32 = this.length;
++    for (let i: u32 = 0; i < len; i++) {
++      this._elems.clearAt(i);
+     }
++  }
++
++  clearSpread<K extends IKey>(key: K): void {
++    this.clearAll();
++    // @ts-ignore
++    clearSpread<u32, K>(this._len, key);
++    this._elems.clearSpread<K>(key);
++  }
+ }
