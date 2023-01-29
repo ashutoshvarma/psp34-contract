@@ -58,6 +58,21 @@ To workaround this,
 
 Since there is no documentation regarding cross-contract calls in Ask! v0.4, the current implementation does not check for [`PSP34Receiver`](https://github.com/w3f/PSPs/blob/master/PSPs/psp-34.md#psp34receiver) before transferring the token.
 
+
+## Supported Extensions
+All of the `PSP34` extensions are supported with the above listed caveats.
+
+### 1. `PSP34Metadata`
+The [`PSP34`](https://github.com/ashutoshvarma/psp34-contract/blob/master/packages/psp34/assembly/psp34/base.ts#L118) class
+supports this extension by default. 
+However the default implementation is only provided for metadata read methods, for adding support for write metadata methods
+consider using `PSP34.__set_attribute()`. See the examples for reference. 
+
+### 2. `PSP34Enumerable`
+For supporting this extension use [`PSP34Enumerable`](https://github.com/ashutoshvarma/psp34-contract/blob/master/packages/psp34/assembly/psp34/extensions/enumerable.ts#L151)
+class instead of `PSP34`. The `PSP34Enumerable` extends the `PSP34` class so you don't need to inherit it. (you can't actually,
+assemblyscript only allow single inheritance). 
+
 ## Usage
 This project use yarn specific features like `patch` so please install install `yarn`, see the instructions [here](https://classic.yarnpkg.com/lang/en/docs/install).
 
