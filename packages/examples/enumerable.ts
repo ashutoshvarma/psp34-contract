@@ -1,5 +1,36 @@
-import { AccountId } from 'ask-lang';
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+import { AccountId, env } from 'ask-lang';
 import { Id, PSP34Enumerable } from 'psp34-contract';
+
+@event({ id: 1 })
+class TransferEvent {
+  from: AccountId;
+  to: AccountId;
+
+  id: Id;
+
+  constructor(from: AccountId, to: AccountId, id: Id) {
+    this.from = from;
+    this.to = to;
+    this.id = id;
+  }
+}
+
+@event({ id: 2 })
+class ApprovalEvent {
+  from: AccountId;
+  to: AccountId;
+
+  id: string;
+  approved: bool;
+
+  constructor(from: AccountId, to: AccountId, id: string, approved: bool) {
+    this.from = from;
+    this.to = to;
+    this.id = id;
+    this.approved = approved;
+  }
+}
 
 @contract
 export class Contract extends PSP34Enumerable {
@@ -20,7 +51,7 @@ export class Contract extends PSP34Enumerable {
     //   BytesBuffer.from(String.UTF8.encode("contractv1")).toArray()
     // );
   }
-  
+
   @message({ mutates: true })
   set_attribute(id: Id, key: Array<u8>, value: Array<u8>): void {
     this._set_attribute(id, key, value);
@@ -39,5 +70,27 @@ export class Contract extends PSP34Enumerable {
   @message({ mutates: true })
   burn(to: AccountId, id: Id): void {
     this._burn_from(to, id);
+  }
+
+  _emit_transfer_event(_from: AccountId, _to: AccountId, _id: Id): void {
+    // @ts-ignore
+    env().emitEvent(new TransferEvent(_from, _to, _id));
+  }
+
+  _emit_approval_event(
+    _from: AccountId,
+    _to: AccountId,
+    _id: Id | null,
+    _approved: bool,
+  ): void {
+    env().emitEvent(
+      // @ts-ignore
+      new ApprovalEvent(
+        _from,
+        _to,
+        _id === null ? '' : _id.toString(),
+        _approved,
+      ),
+    );
   }
 }
