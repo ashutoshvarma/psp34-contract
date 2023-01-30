@@ -58,6 +58,18 @@ To workaround this,
 
 Since there is no documentation regarding cross-contract calls in Ask! v0.4, the current implementation does not check for [`PSP34Receiver`](https://github.com/w3f/PSPs/blob/master/PSPs/psp-34.md#psp34receiver) before transferring the token.
 
+#### Selectors
+Since most of the methods have somewhat different siganture than what is described in PSP34 Spec, this implementation
+does not enforce selectors described in PSP34 Specification. 
+If you wish to use same selectors from Specification, simply override the method and set selector in decorator `@message({selector: "0xabcdef"})`
+
+```ts
+  @message({selector: "0xffa27a5f"})
+  collection_id(): CollectionId {
+    return super.collection_id();
+  }
+```
+
 ## Supported Extensions
 
 All of the `PSP34` extensions are supported with the above listed caveats.
