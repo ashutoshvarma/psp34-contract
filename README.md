@@ -58,34 +58,49 @@ To workaround this,
 
 Since there is no documentation regarding cross-contract calls in Ask! v0.4, the current implementation does not check for [`PSP34Receiver`](https://github.com/w3f/PSPs/blob/master/PSPs/psp-34.md#psp34receiver) before transferring the token.
 
-
 ## Supported Extensions
+
 All of the `PSP34` extensions are supported with the above listed caveats.
 
 ### 1. `PSP34Metadata`
+
 The [`PSP34`](https://github.com/ashutoshvarma/psp34-contract/blob/master/packages/psp34/assembly/psp34/base.ts#L118) class
-supports this extension by default. 
+supports this extension by default.
 However the default implementation is only provided for metadata read methods, for adding support for write metadata methods
-consider using `PSP34.__set_attribute()`. See the examples for reference. 
+consider using `PSP34.__set_attribute()`. See the examples for reference.
 
 ### 2. `PSP34Enumerable`
+
 For supporting this extension use [`PSP34Enumerable`](https://github.com/ashutoshvarma/psp34-contract/blob/master/packages/psp34/assembly/psp34/extensions/enumerable.ts#L151)
 class instead of `PSP34`. The `PSP34Enumerable` extends the `PSP34` class so you don't need to inherit it. (you can't actually,
-assemblyscript only allow single inheritance). 
+assemblyscript only allow single inheritance).
 
 ## Usage
-This project use yarn specific features like `patch` so please install install `yarn`, see the instructions [here](https://classic.yarnpkg.com/lang/en/docs/install).
+
+This project use yarn specific features like `patch` so please install install `yarn`, see the instructions [here](https://classic.yarnpkg.com/lang/en/docs/install). This requires you to use yarn v2 as package manager.
 
 ### `ask-contract-runtime` & `ask-lang` Patching
-For the use in this project `ask-contract-runtime` v0.4.0 needs to be patch. For more information see https://github.com/ask-lang/ask/issues/243. Also `ask-lang` v0.4.0 is patched for adding `Vector.delete()`. Patches are below :-
--  [ask-contract-runtime-npm-0.4.0-3a1dc4e3ab](./.yarn/patches/ask-contract-runtime-npm-0.4.0-3a1dc4e3ab.patch)
--  [ask-lang-npm-0.4.0-830b1190bb](./.yarn/patches/ask-lang-npm-0.4.0-830b1190bb.patch)
 
-Yarn automatically patch both packages so you don't need to do anything. 
- 
+For the use in this project `ask-contract-runtime` v0.4.0 needs to be patch. For more information see https://github.com/ask-lang/ask/issues/243. Also `ask-lang` v0.4.0 is patched for adding `Vector.delete()`. Patches are below :-
+
+- [ask-contract-runtime-npm-0.4.0-3a1dc4e3ab](./.yarn/patches/ask-contract-runtime-npm-0.4.0-3a1dc4e3ab.patch)
+- [ask-lang-npm-0.4.0-830b1190bb](./.yarn/patches/ask-lang-npm-0.4.0-830b1190bb.patch)
+
+Copy both patches into your `.yarn/patches` folder and add the below resolutions into your package.json.
+
+```json
+  "resolutions": {
+    "ask-contract-runtime@0.4.0": "patch:ask-contract-runtime@npm%3A0.4.0#./.yarn/patches/ask-contract-runtime-npm-0.4.0-3a1dc4e3ab.patch",
+    "ask-lang@^0.4.0": "patch:ask-lang@npm%3A0.4.0#./.yarn/patches/ask-lang-npm-0.4.0-830b1190bb.patch"
+  }
+```
+
 ### Add as dependency
+
 This package is not currently deployed to NPM Registry as of now, to add this as dependency to your Ask! project
 add it like this to you package.json. See [yarn documentation](https://yarnpkg.com/features/protocols#can-i-install-a-workspace-of-a-project-when-using-the-git-protocol).
+
+This requires you to use yarn v2 as package manager.
 
 ```json
 {
@@ -129,6 +144,7 @@ export class NFTContract extends PSP34 {
 For detailed guide see [`GUIDE.md`](./GUIDE.md)
 
 ## Tests
+
 There are no Unit tests unfortunately due to the lack of any documentation of contract testing in Ask! and
 testing helpers like counterpart to `#[ink(test)]`. If you know how to test Ask! projects let me know.
 

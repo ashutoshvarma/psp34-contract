@@ -38,11 +38,11 @@ npm install --global yarn
 
 #### Clone the `ask-template` repo
 
-Simply clone the the official contract template provided by ask! - `ask-template`.
+Simply clone the the modified version of contract template provided by ask! - `ask-template`.
 Execute the below commands to clone the repository and cd into it.
 
 ```
-git clone https://github.com/ask-lang/ask-template.git
+git clone https://github.com/ashutoshvarma/ask-template.git
 cd ask-template
 ```
 
@@ -66,7 +66,15 @@ ask-template
 
 #### Add `psp34-contract`
 
-Add `psp34-contract` as dependency in your package.json. Read the instructions [here](https://github.com/ashutoshvarma/psp34-contract#add-as-dependency).
+Add `psp34-contract` as dependency in your package.json like this,
+
+```json
+  "dependencies": {
+    "psp34-contract": "ashutoshvarma/psp34-contract#workspace=psp34-contract"
+  }
+```
+
+For detailed instructions read [here](https://github.com/ashutoshvarma/psp34-contract#add-as-dependency).
 Don't forget to run `yarn` afterwards.
 
 You are good to go now!
@@ -126,7 +134,7 @@ so let's add a simple `mint()` after the constructor method.
 The `PSP34` class contains `_mint_to()` internal method for minting new tokens, so we use it
 to build our `mint()` function.
 
-For the sake of simplicity we are not adding any access control to out `mint()` function,
+For the sake of simplicity we are not adding any access control to our `mint()` function,
 but if you want, you can add assertions like.
 
 ```ts
@@ -188,18 +196,139 @@ export class Contract extends PSP34Enumerable {
 ```
 
 #### Note :-
+
 It would've been nice to inherit from both `PSP34` and `PSP34Enumerable` but AssemblyScript does
 not support multiple inheritance.
 
 ### 6. Events
 
+To complete our contract the last step is to handle events. Contracts emit events when they want
+to send notification about changes or conditions in the state to external parties like subgraphs,
+explorers, etc.
+
+#### Transfer Event
+
+The Transfer event as the name suggests should be emitted when token is minted/transferred.
+We can emit this event from out `mint()`/`transfer()` method but `PSP34` class has an internal method just for that called
+`PSP34_emit_transfer_event()`. It has a default implementation but we will override that in this
+guide.
+
+#### Approval Event
+
+For approval event, we will use `PSP34._emit_approval_event()` internal method.
+
+#### Add Events
+
+We are assigning Transfer Event with id of 1 and Approval Event with 2.
+
+```ts
+@event({ id: 1 })
+class TransferEvent {
+  from: AccountId;
+  to: AccountId;
+  id: Id;
+
+  constructor(from: AccountId, to: AccountId, id: Id) {
+    this.from = from;
+    this.to = to;
+    this.id = id;
+  }
+}
+
+@event({ id: 2 })
+class ApprovalEvent {
+  from: AccountId;
+  to: AccountId;
+
+  // id is string because we will need to handle
+  // case for null and using null in class variables
+  // in ask! causes compiler panic.
+  id: string;
+  approved: bool;
+
+  constructor(from: AccountId, to: AccountId, id: string, approved: bool) {
+    this.from = from;
+    this.to = to;
+    this.id = id;
+    this.approved = approved;
+  }
+}
+```
+
+Add the above events in the `nft.ts` file above the class declaration.
+
+Now add the methods overrides for emitting events.
+
+```ts
+  _emit_transfer_event(_from: AccountId, _to: AccountId, _id: Id): void {
+    // @ts-ignore
+    env().emitEvent(new TransferEvent(_from, _to, _id));
+  }
+
+  _emit_approval_event(
+    _from: AccountId,
+    _to: AccountId,
+    _id: Id | null,
+    _approved: bool
+  ): void {
+    env().emitEvent(
+      // @ts-ignore
+      new ApprovalEvent(
+        _from,
+        _to,
+        _id === null ? "" : _id.toString(),
+        _approved
+      )
+    );
+  }
+```
+
 ### 7. Final Contract Code
 
-## Advanced
-The `PSP34`/`PSP34Enumerable` classes also provide 
+After completing all the above steps your contract should look like the [this](./packages/examples/enumerable.ts).
 
-## Deploy
+## Next Steps
 
-Update the ``askconfig.json`
-Build your NFT contract using the `yarn build nft.ts`
-Deploy to shibuya
+### Update your contract metadata information
+
+Your contract metadata information such as license, author, etc are stored in `askconfig.json` file.
+Update the file like this.
+
+```json
+{
+  "metadataContract": {
+    "name": "PSP34",
+    "version": "0.1.0",
+    "license": "MIT"
+  },
+  "metadataTargetPath": "build/metadata.json",
+  "strict": true,
+  "event": {
+    "maxTopicNum": 2
+  }
+}
+```
+
+### Build & Deploy
+
+Build your contract with the below command.
+
+```
+yarn build nft.ts
+```
+
+It will build the contract wasm file along with the metadata.json file in build folder.
+Read instructions to deploy contract using polkadot{.js} [here](https://docs.astar.network/docs/builder-guides/XVM%20and%20WASM/set_up_your_ask_environement/#ask-environment-setup)
+
+#### Note
+
+As of now you cannot interact with contracts deployed on Shibuya Testnet Or Rococo Contracts through
+polkadot{.js} as it does not support `WeightsV2`, awaiting [PR to be merged](https://github.com/polkadot-js/apps/pull/8538).
+
+After deploying you contract with polkadot{.js} use [Contract UI](https://contracts-ui.substrate.io/) to interact with deployed contract.
+
+## Reference
+
+- Ask! Documentation - https://ask-lang.github.io/ask-docs/
+- PSP34 Specification - https://github.com/w3f/PSPs/blob/master/PSPs/psp-34.md
+- psp34-contract - https://github.com/ashutoshvarma/psp34-contract
