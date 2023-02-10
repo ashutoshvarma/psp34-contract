@@ -5,7 +5,7 @@
     "lint:fix": "asb fmt \"assembly/**/*.ts\"",
     "lint": "asb fmt \"assembly/**/*.ts\" --lint",
     "build": "ASK_CONFIG=./askconfig.json asb --target release",
-    "debug": "DEBUG=* ASK_CONFIG=./askconfig.json asb --target release"
+    "debug": "DEBUG=* ASK_CONFIG=./askconfig.json asb --target debug"
   },
   "devDependencies": {
     "@as-pect/cli": "^6",
