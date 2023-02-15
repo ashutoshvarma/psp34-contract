@@ -177,23 +177,23 @@ export class Result<O, E> {
     return this._err.val0;
   }
 
-  // @inline
-  // @operator('==')
-  // eq(other: this): bool {
-  //   if (this.isOk && other.isOk) {
-  //     return this.Ok == other.Ok;
-  //   }
-  //   if (this.isErr && other.isErr) {
-  //     return this.Err == other.Err;
-  //   }
-  //   return false;
-  // }
+  @inline
+  @operator('==')
+  eq(other: this): bool {
+    if (this.isOk && other.isOk) {
+      return this._ok == other._ok;
+    }
+    if (this.isErr && other.isErr) {
+      return this._err == other._err;
+    }
+    return false;
+  }
 
-  // @inline
-  // @operator('!=')
-  // notEq(other: this): bool {
-  //   return !this.eq(other);
-  // }
+  @inline
+  @operator('!=')
+  notEq(other: this): bool {
+    return !this.eq(other);
+  }
 
   // @ts-ignore
   serialize<__R, __S extends Serializer<__R>>(serializer: __S): __R {
