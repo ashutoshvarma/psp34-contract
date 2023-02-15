@@ -1,24 +1,25 @@
-import { AccountId, Balance, u128 } from "ask-lang";
-import { CollectionId, Id } from "../types";
+import { Empty, Option, Result } from 'ask-common';
+import { AccountId, Balance } from 'ask-lang';
+import { Id, PSP34Error } from '../types';
 
 // export interface IPSP34 extends IContract, SpreadLayout {
 export interface IPSP34 {
   /// Returns the collection `Id` of the NFT token.
-  collection_id(): CollectionId;
+  collection_id(): Id;
 
-  balance_of(owner: AccountId): u128;
+  balance_of(owner: AccountId): u32;
 
-  owner_of(token_id: Id): AccountId;
+  owner_of(token_id: Id): Option<AccountId>;
 
-  allowance(owner: AccountId, operator: AccountId, id: Id): bool;
+  allowance(owner: AccountId, operator: AccountId, id: Option<Id>): bool;
 
-  approve(to: AccountId, id: Id, approved: bool): void;
+  approve(
+    to: AccountId,
+    id: Option<Id>,
+    approved: bool,
+  ): Result<Empty, PSP34Error>;
 
-  allowance_all(owner: AccountId, operator: AccountId): bool;
-
-  approve_all(to: AccountId, approved: bool): void;
-
-  transfer(to: AccountId, id: Id, data: Uint8Array): void;
+  transfer(to: AccountId, id: Id, data: Uint8Array): Result<Empty, PSP34Error>;
 
   total_supply(): Balance;
 }

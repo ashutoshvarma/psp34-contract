@@ -1,93 +1,16 @@
 import { ScaleSerializer } from 'as-serde-scale';
-import {
-  AccountId,
-  env,
-  HashKeccak256,
-  Mapping,
-  u128,
-  ZERO_ACCOUNT,
-} from 'ask-lang';
+import { Empty, Option, Result, Tuple2, Tuple3 } from 'ask-common';
+import { AccountId, env, HashKeccak256, Mapping, u128 } from 'ask-lang';
 import { IBalances } from '../interfaces/balances';
 import { IPSP34 } from '../interfaces/psp34';
-import { CollectionId, Id, Operator, Owner } from '../types';
+import { Id, Operator, Owner, PSP34Error } from '../types';
 // import { Option } from "../utils/option";
 import { Balances } from './balances';
 
-// @event({ id: 1 })
-// class TransferEvent {
-//   from: AccountId;
-//   to: AccountId;
+const EMPTY = new Empty();
 
-//   id: Id;
-
-//   constructor(from: AccountId, to: AccountId, id: Id) {
-//     this.from = from;
-//     this.to = to;
-//     this.id = id;
-//   }
-// }
-
-// @event({ id: 2 })
-// class ApprovalEvent {
-//   from: AccountId;
-//   to: AccountId;
-
-//   id: string;
-//   approved: bool;
-
-//   constructor(from: AccountId, to: AccountId, id: string, approved: bool) {
-//     this.from = from;
-//     this.to = to;
-//     this.id = id;
-//     this.approved = approved;
-//   }
-// }
-
-@serialize({ omitName: true })
-@deserialize({ omitName: true })
-export class OperatorApproval {
-  static APPROVED_ALL: string = '';
-
-  public owner: Owner;
-  public operator: Operator;
-  _id: string;
-
-  constructor(owner: Owner, operator: Operator, id: Id | null) {
-    this.owner = owner;
-    this.operator = operator;
-    this._id = id === null ? OperatorApproval.APPROVED_ALL : id.toString();
-  }
-
-  get id(): Id {
-    return u128.fromString(this._id);
-  }
-}
-
-@serialize({ omitName: true })
-@deserialize({ omitName: true })
-export class AttributeKey {
-  static OPERATOR_ID: string = '';
-
-  public key: Array<u8>;
-  _id: string;
-
-  constructor(id: Id | null, key: Array<u8>) {
-    this.key = key;
-    this._id = id === null ? AttributeKey.OPERATOR_ID : id.toString();
-  }
-}
-
-@serialize()
-@deserialize()
-class Empty {}
-
-// // as-serde-scale fails to encode/decode builtin types
-// // that has no default constructor arguments.
-// class _Uint8Array extends Uint8Array {
-//   constructor(len: i32 = 0) {
-//     super(len);
-//   }
-// }
+type OperatorApproval = Tuple3<Owner, Operator, Option<Id>>;
+type AttributeKey = Tuple2<Id, Array<u8>>;
 
 //
 // PSP34 Base Contract Storage
@@ -96,12 +19,13 @@ class Empty {}
 export class PSP34Data<B extends IBalances = Balances> {
   // mapping of token Id to token owner
   token_owner: Mapping<Id, Owner, HashKeccak256> = new Mapping();
-  // mapping of approvals tuple, interanlly saves `Id` as string
+  // mapping of approvals tuple
   operator_approvals: Mapping<OperatorApproval, Empty, HashKeccak256> =
     new Mapping();
 
   // sttributes-key mapping
-  attributes: Mapping<AttributeKey, Array<u8>, HashKeccak256> = new Mapping();
+  attributes: Mapping<AttributeKey, Array<u8>, HashKeccak256> =
+    new Mapping();
   // balances instance
   balances: B = instantiate<B>();
 }
@@ -126,8 +50,10 @@ export class PSP34<B extends IBalances = Balances> implements IPSP34 {
    * @returns CollectionId (AccountId)
    */
   @message()
-  collection_id(): CollectionId {
-    return ScaleSerializer.serialize<AccountId>(env().accountId<AccountId>());
+  collection_id(): Id {
+    return Id.Bytes(
+      ScaleSerializer.serialize<AccountId>(env().accountId<AccountId>()),
+    );
   }
 
   /**
@@ -136,27 +62,20 @@ export class PSP34<B extends IBalances = Balances> implements IPSP34 {
    * @returns Bytes Array of attributes
    */
   @message()
-  get_attribute(id: Id, key: Array<u8>): Array<u8> {
-    const attr = this.data.attributes.getOrNull(new AttributeKey(id, key));
-    return attr === null ? [] : attr;
-  }
-
-  /**
-   * Get the metadata attributes for collection
-   * @note Not part of PSP34 spec
-   * @returns Bytes Array of attributes
-   */
-  @message()
-  get_collection_attribute(key: Array<u8>): Array<u8> {
-    const attr = this.data.attributes.getOrNull(new AttributeKey(null, key));
-    return attr === null ? [] : attr;
+  get_attribute(id: Id, key: Array<u8>): Option<Array<u8>> {
+    const attr = this.data.attributes.getOrNull(
+      new Tuple2<Id, Array<u8>>(id, key),
+    );
+    return attr === null
+      ? Option.None<Array<u8>>()
+      : Option.Some<Array<u8>>(attr);
   }
 
   /**
    * Gets token balance of account.
    */
   @message()
-  balance_of(owner: AccountId): u128 {
+  balance_of(owner: AccountId): u32 {
     return this.data.balances.balance_of(owner);
   }
 
@@ -165,7 +84,7 @@ export class PSP34<B extends IBalances = Balances> implements IPSP34 {
    * returns ZERO ADDRESS
    */
   @message()
-  owner_of(id: Id): AccountId {
+  owner_of(id: Id): Option<AccountId> {
     return this._owner_of(id);
   }
 
@@ -176,7 +95,7 @@ export class PSP34<B extends IBalances = Balances> implements IPSP34 {
    * @param id token id
    */
   @message()
-  allowance(owner: AccountId, operator: AccountId, id: u128): bool {
+  allowance(owner: AccountId, operator: AccountId, id: Option<Id>): bool {
     return this._allowance(owner, operator, id);
   }
 
@@ -187,26 +106,12 @@ export class PSP34<B extends IBalances = Balances> implements IPSP34 {
    * @param approved enable or disbale allowance
    */
   @message({ mutates: true })
-  approve(operator: AccountId, id: u128, approved: bool): void {
+  approve(
+    operator: AccountId,
+    id: Option<Id>,
+    approved: bool,
+  ): Result<Empty, PSP34Error> {
     return this._approve_for(operator, id, approved);
-  }
-
-  /**
-   * Check for operator priviledges for given operator for all tokens
-   * @note Not part of PSP34 spec
-   */
-  @message()
-  allowance_all(owner: AccountId, operator: AccountId): bool {
-    return this._allowance(owner, operator, null);
-  }
-
-  /**
-   * Approve the operator for all tokens
-   * @note Not part of PSP34 spec
-   */
-  @message({ mutates: true })
-  approve_all(operator: AccountId, approved: bool): void {
-    return this._approve_for(operator, null, approved);
   }
 
   /**
@@ -216,8 +121,8 @@ export class PSP34<B extends IBalances = Balances> implements IPSP34 {
    * @param data data (if any) to pass to reciever (if supports)
    */
   @message({ mutates: true })
-  transfer(to: AccountId, id: u128, data: Uint8Array): void {
-    this._transfer_token(to, id, data);
+  transfer(to: AccountId, id: Id, data: Uint8Array): Result<Empty, PSP34Error> {
+    return this._transfer_token(to, id, data);
   }
 
   /**
@@ -228,7 +133,11 @@ export class PSP34<B extends IBalances = Balances> implements IPSP34 {
     return this.data.balances.total_supply();
   }
 
-  _emit_transfer_event(_from: AccountId, _to: AccountId, _id: Id): void {
+  _emit_transfer_event(
+    _from: Option<AccountId>,
+    _to: Option<AccountId>,
+    _id: Id,
+  ): void {
     // // @ts-ignore
     // env().emitEvent(new TransferEvent(_from, _to, _id));
   }
@@ -236,7 +145,7 @@ export class PSP34<B extends IBalances = Balances> implements IPSP34 {
   _emit_approval_event(
     _from: AccountId,
     _to: AccountId,
-    _id: Id | null,
+    _id: Option<Id>,
     _approved: bool,
   ): void {
     // env().emitEvent(
@@ -251,34 +160,46 @@ export class PSP34<B extends IBalances = Balances> implements IPSP34 {
   }
 
   _emit_attribute_set_event(
-    _id: Id | null,
+    _id: Id,
     key: Array<u8>,
     _data: Array<u8>,
   ): void {}
 
-  _set_attribute(id: Id | null, key: Array<u8>, value: Array<u8>): void {
-    this.data.attributes.set(new AttributeKey(id, key), value);
+  _set_attribute(id: Id, key: Array<u8>, value: Array<u8>): void {
+    this.data.attributes.set(new Tuple2(id, key), value);
     this._emit_attribute_set_event(id, key, value);
   }
 
-  _approve_for(to: AccountId, id: Id | null, approved: bool): void {
+  _approve_for(
+    to: AccountId,
+    id: Option<Id>,
+    approved: bool,
+  ): Result<Empty, PSP34Error> {
     let caller = env().caller<AccountId>();
 
-    if (id !== null) {
-      const owner = this.data.token_owner.getOrNull(id);
-      if (owner === null) throw 'PSP34Error::TokenNotExists';
+    if (id.isSome) {
+      const owner = this.data.token_owner.getOrNull(id.unwrap());
+      if (owner === null)
+        return Result.Err<Empty, PSP34Error>(PSP34Error.TokenNotExists());
 
       if (approved && owner == to) {
-        throw 'PSP34Error::SelfApprove';
+        return Result.Err<Empty, PSP34Error>(PSP34Error.SelfApprove());
       }
 
-      if (owner != caller && !this._allowance(owner, caller, null)) {
-        throw 'PSP34Error::NotApproved';
+      if (
+        owner != caller &&
+        !this._allowance(owner, caller, Option.None<Id>())
+      ) {
+        return Result.Err<Empty, PSP34Error>(PSP34Error.NotApproved());
       }
       caller = owner;
     }
 
-    const operator_approval = new OperatorApproval(caller, to, id);
+    const operator_approval = new Tuple3<AccountId, AccountId, Option<Id>>(
+      caller,
+      to,
+      id,
+    );
     if (approved) {
       this.data.operator_approvals.set(operator_approval, new Empty());
     } else {
@@ -286,35 +207,67 @@ export class PSP34<B extends IBalances = Balances> implements IPSP34 {
     }
 
     this._emit_approval_event(caller, to, id, approved);
+
+    return Result.Ok<Empty, PSP34Error>(EMPTY);
   }
 
-  _owner_of(id: Id): AccountId {
-    return this.data.token_owner.get(id);
+  _owner_of(id: Id): Option<AccountId> {
+    const account = this.data.token_owner.getOrNull(id);
+    return account ? Option.Some<AccountId>(account) : Option.None<AccountId>();
   }
 
-  _transfer_token(to: AccountId, id: Id, data: Uint8Array): void {
-    const owner = this._check_token_exists(id);
-    const caller = env().caller<AccountId>();
-
-    if (owner != caller && !this._allowance(owner, caller, id)) {
-      throw 'PSP34Error::NotApproved';
+  _transfer_token(
+    to: AccountId,
+    id: Id,
+    data: Uint8Array,
+  ): Result<Empty, PSP34Error> {
+    const ownerRes = this._check_token_exists(id);
+    if (ownerRes.isErr) {
+      return ownerRes.map<Empty>((_a) => EMPTY);
     }
 
-    this._before_token_transfer(owner, to, id);
+    const owner = ownerRes.unwrap();
+    const caller = env().caller<AccountId>();
+
+    if (
+      owner != caller &&
+      !this._allowance(owner, caller, Option.Some<Id>(id))
+    ) {
+      return Result.Err<Empty, PSP34Error>(PSP34Error.NotApproved());
+    }
+
+    this._before_token_transfer(
+      Option.Some<AccountId>(owner),
+      Option.Some<AccountId>(to),
+      id,
+    );
 
     this.data.operator_approvals.delete(
-      new OperatorApproval(owner, caller, id),
+      new Tuple3(owner, caller, Option.Some<Id>(id)),
     );
     this.data.balances.decrease_balance(owner, id, false);
     this.data.token_owner.delete(id);
 
-    this._do_safe_transfer_check(caller, owner, to, id, data);
+    const safeCheck = this._do_safe_transfer_check(caller, owner, to, id, data);
+    if (safeCheck.isErr) {
+      return safeCheck;
+    }
 
     this.data.balances.increase_balance(to, id, false);
     this.data.token_owner.set(id, to);
 
-    this._after_token_transfer(owner, to, id);
-    this._emit_transfer_event(owner, to, id);
+    this._after_token_transfer(
+      Option.Some<AccountId>(owner),
+      Option.Some<AccountId>(to),
+      id,
+    );
+    this._emit_transfer_event(
+      Option.Some<AccountId>(owner),
+      Option.Some<AccountId>(to),
+      id,
+    );
+
+    return Result.Ok<Empty, PSP34Error>(EMPTY);
   }
 
   _do_safe_transfer_check(
@@ -323,59 +276,105 @@ export class PSP34<B extends IBalances = Balances> implements IPSP34 {
     to: AccountId,
     id: Id,
     data: Uint8Array,
-  ): void {
+  ): Result<Empty, PSP34Error> {
     // TODO: implement
+    return Result.Ok<Empty, PSP34Error>(EMPTY);
   }
 
-  _mint_to(to: AccountId, id: Id): void {
+  _mint_to(to: AccountId, id: Id): Result<Empty, PSP34Error> {
     if (this.data.token_owner.getOrNull(id) !== null) {
-      throw 'PSP34Error::TokenExists';
+      // throw 'PSP34Error::TokenExists';
+      return Result.Err<Empty, PSP34Error>(PSP34Error.TokenExists());
     }
-    this._before_token_transfer(ZERO_ACCOUNT, to, id);
+    this._before_token_transfer(
+      Option.None<AccountId>(),
+      Option.Some<AccountId>(to),
+      id,
+    );
 
     this.data.balances.increase_balance(to, id, true);
     this.data.token_owner.set(id, to);
-    this._after_token_transfer(ZERO_ACCOUNT, to, id);
-    this._emit_transfer_event(ZERO_ACCOUNT, to, id);
+    this._after_token_transfer(
+      Option.None<AccountId>(),
+      Option.Some<AccountId>(to),
+      id,
+    );
+    this._emit_transfer_event(
+      Option.None<AccountId>(),
+      Option.Some<AccountId>(to),
+      id,
+    );
+
+    return Result.Ok<Empty, PSP34Error>(EMPTY);
   }
 
-  _burn_from(from: AccountId, id: Id): void {
-    this._check_token_exists(id);
+  _burn_from(from: AccountId, id: Id): Result<Empty, PSP34Error> {
+    const ownerRes = this._check_token_exists(id);
+    if (ownerRes.isErr) {
+      return ownerRes.map<Empty>((_a) => EMPTY);
+    }
 
-    this._before_token_transfer(from, ZERO_ACCOUNT, id);
+    this._before_token_transfer(
+      Option.Some<AccountId>(from),
+      Option.None<AccountId>(),
+      id,
+    );
 
     this.data.token_owner.delete(id);
     this.data.balances.decrease_balance(from, id, true);
-    this._after_token_transfer(from, ZERO_ACCOUNT, id);
-    this._emit_transfer_event(from, ZERO_ACCOUNT, id);
+    this._after_token_transfer(
+      Option.Some<AccountId>(from),
+      Option.None<AccountId>(),
+      id,
+    );
+    this._emit_transfer_event(
+      Option.Some<AccountId>(from),
+      Option.None<AccountId>(),
+      id,
+    );
+    return Result.Ok<Empty, PSP34Error>(EMPTY);
   }
 
-  _allowance(owner: Owner, operator: Operator, id: Id | null): bool {
+  _allowance(owner: Owner, operator: Operator, id: Option<Id>): bool {
     const approve_all =
       this.data.operator_approvals.getOrNull(
-        new OperatorApproval(owner, operator, null),
+        new Tuple3<Owner, Operator, Option<Id>>(
+          owner,
+          operator,
+          // id None
+          Option.None<Id>(),
+        ),
       ) !== null;
     const approve_id =
-      id !== null &&
+      id.isSome &&
       this.data.operator_approvals.getOrNull(
-        new OperatorApproval(owner, operator, id),
+        new Tuple3<Owner, Operator, Option<Id>>(owner, operator, id),
       ) !== null;
     return approve_all || approve_id;
   }
 
-  _check_token_exists(id: Id): AccountId {
+  _check_token_exists(id: Id): Result<AccountId, PSP34Error> {
     let owner = this.data.token_owner.getOrNull(id);
     if (owner === null) {
-      throw 'PSP34Error::TokenNotExists';
+      // throw 'PSP34Error::TokenNotExists';
+      return Result.Err<AccountId, PSP34Error>(PSP34Error.TokenNotExists());
     }
-    return owner;
+    return Result.Ok<AccountId, PSP34Error>(owner);
   }
 
-  _before_token_transfer(from: AccountId, to: AccountId, id: Id): void {
+  _before_token_transfer(
+    from: Option<AccountId>,
+    to: Option<AccountId>,
+    id: Id,
+  ): void {
     this.data.balances.before_token_transfer(from, to, id);
   }
 
-  _after_token_transfer(from: AccountId, to: AccountId, id: Id): void {
+  _after_token_transfer(
+    from: Option<AccountId>,
+    to: Option<AccountId>,
+    id: Id,
+  ): void {
     this.data.balances.after_token_transfer(from, to, id);
   }
 }
