@@ -1,0 +1,730 @@
+{
+  "source": {
+    "hash": "",
+    "language": "Ask! 0.4.0",
+    "compiler": "asc 0.19.23"
+  },
+  "contract": {
+    "name": "Example",
+    "version": "0.1.0",
+    "license": "MIT"
+  },
+  "V3": {
+    "spec": {
+      "constructors": [
+        {
+          "args": [],
+          "docs": [],
+          "label": "default",
+          "payable": false,
+          "selector": "0xed4b9d1b"
+        }
+      ],
+      "messages": [
+        {
+          "mutates": true,
+          "payable": true,
+          "args": [
+            {
+              "type": {
+                "type": 6,
+                "displayName": [
+                  "Id"
+                ]
+              },
+              "label": "id"
+            },
+            {
+              "type": {
+                "type": 7,
+                "displayName": [
+                  "Array<u8>"
+                ]
+              },
+              "label": "key"
+            },
+            {
+              "type": {
+                "type": 7,
+                "displayName": [
+                  "Array<u8>"
+                ]
+              },
+              "label": "value"
+            }
+          ],
+          "docs": [],
+          "label": "set_attribute",
+          "selector": "0x12b9f661"
+        },
+        {
+          "mutates": true,
+          "payable": true,
+          "args": [
+            {
+              "type": {
+                "type": 9,
+                "displayName": [
+                  "AccountId"
+                ]
+              },
+              "label": "to"
+            },
+            {
+              "type": {
+                "type": 6,
+                "displayName": [
+                  "Id"
+                ]
+              },
+              "label": "id"
+            }
+          ],
+          "docs": [],
+          "label": "mint",
+          "selector": "0xcfdd9aa2"
+        },
+        {
+          "mutates": true,
+          "payable": true,
+          "args": [
+            {
+              "type": {
+                "type": 9,
+                "displayName": [
+                  "AccountId"
+                ]
+              },
+              "label": "to"
+            },
+            {
+              "type": {
+                "type": 6,
+                "displayName": [
+                  "Id"
+                ]
+              },
+              "label": "id"
+            }
+          ],
+          "returnType": {
+            "type": 13,
+            "displayName": [
+              "Result<Empty, PSP34Error>"
+            ]
+          },
+          "docs": [],
+          "label": "burn",
+          "selector": "0xb1efc17b"
+        },
+        {
+          "mutates": false,
+          "payable": false,
+          "args": [],
+          "returnType": {
+            "type": 6,
+            "displayName": [
+              "Id"
+            ]
+          },
+          "docs": [],
+          "label": "collection_id",
+          "selector": "0xc10375f2"
+        },
+        {
+          "mutates": false,
+          "payable": false,
+          "args": [
+            {
+              "type": {
+                "type": 9,
+                "displayName": [
+                  "AccountId"
+                ]
+              },
+              "label": "owner"
+            }
+          ],
+          "returnType": {
+            "type": 4,
+            "displayName": [
+              "u32"
+            ]
+          },
+          "docs": [],
+          "label": "balance_of",
+          "selector": "0x0f755a56"
+        },
+        {
+          "mutates": false,
+          "payable": false,
+          "args": [
+            {
+              "type": {
+                "type": 6,
+                "displayName": [
+                  "Id"
+                ]
+              },
+              "label": "id"
+            }
+          ],
+          "returnType": {
+            "type": 14,
+            "displayName": [
+              "Option<AccountId>"
+            ]
+          },
+          "docs": [],
+          "label": "owner_of",
+          "selector": "0x99720c1e"
+        },
+        {
+          "mutates": false,
+          "payable": false,
+          "args": [
+            {
+              "type": {
+                "type": 9,
+                "displayName": [
+                  "AccountId"
+                ]
+              },
+              "label": "owner"
+            },
+            {
+              "type": {
+                "type": 9,
+                "displayName": [
+                  "AccountId"
+                ]
+              },
+              "label": "operator"
+            },
+            {
+              "type": {
+                "type": 15,
+                "displayName": [
+                  "Option<Id>"
+                ]
+              },
+              "label": "id"
+            }
+          ],
+          "returnType": {
+            "type": 16,
+            "displayName": [
+              "bool"
+            ]
+          },
+          "docs": [],
+          "label": "allowance",
+          "selector": "0x6a00165e"
+        },
+        {
+          "mutates": true,
+          "payable": true,
+          "args": [
+            {
+              "type": {
+                "type": 9,
+                "displayName": [
+                  "AccountId"
+                ]
+              },
+              "label": "operator"
+            },
+            {
+              "type": {
+                "type": 15,
+                "displayName": [
+                  "Option<Id>"
+                ]
+              },
+              "label": "id"
+            },
+            {
+              "type": {
+                "type": 16,
+                "displayName": [
+                  "bool"
+                ]
+              },
+              "label": "approved"
+            }
+          ],
+          "returnType": {
+            "type": 13,
+            "displayName": [
+              "Result<Empty, PSP34Error>"
+            ]
+          },
+          "docs": [],
+          "label": "approve",
+          "selector": "0x681266a0"
+        },
+        {
+          "mutates": true,
+          "payable": true,
+          "args": [
+            {
+              "type": {
+                "type": 9,
+                "displayName": [
+                  "AccountId"
+                ]
+              },
+              "label": "to"
+            },
+            {
+              "type": {
+                "type": 6,
+                "displayName": [
+                  "Id"
+                ]
+              },
+              "label": "id"
+            },
+            {
+              "type": {
+                "type": 17,
+                "displayName": [
+                  "Uint8Array"
+                ]
+              },
+              "label": "data"
+            }
+          ],
+          "returnType": {
+            "type": 13,
+            "displayName": [
+              "Result<Empty, PSP34Error>"
+            ]
+          },
+          "docs": [],
+          "label": "transfer",
+          "selector": "0x84a15da1"
+        },
+        {
+          "mutates": false,
+          "payable": false,
+          "args": [],
+          "returnType": {
+            "type": 2,
+            "displayName": [
+              "u128"
+            ]
+          },
+          "docs": [],
+          "label": "total_supply",
+          "selector": "0xdb6375a8"
+        },
+        {
+          "mutates": false,
+          "payable": false,
+          "args": [
+            {
+              "type": {
+                "type": 6,
+                "displayName": [
+                  "Id"
+                ]
+              },
+              "label": "id"
+            },
+            {
+              "type": {
+                "type": 7,
+                "displayName": [
+                  "Array<u8>"
+                ]
+              },
+              "label": "key"
+            }
+          ],
+          "returnType": {
+            "type": 18,
+            "displayName": [
+              "Option<Array<u8>>"
+            ]
+          },
+          "docs": [],
+          "label": "get_attribute",
+          "selector": "0x97f86da4"
+        }
+      ],
+      "events": [],
+      "docs": [
+        ""
+      ]
+    },
+    "types": [
+      {
+        "id": 0,
+        "type": {
+          "def": {
+            "primitive": "u8"
+          }
+        }
+      },
+      {
+        "id": 1,
+        "type": {
+          "def": {
+            "sequence": {
+              "type": 0
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "type": {
+          "def": {
+            "primitive": "u128"
+          }
+        }
+      },
+      {
+        "id": 3,
+        "type": {
+          "def": {
+            "primitive": "u64"
+          }
+        }
+      },
+      {
+        "id": 4,
+        "type": {
+          "def": {
+            "primitive": "u32"
+          }
+        }
+      },
+      {
+        "id": 5,
+        "type": {
+          "def": {
+            "primitive": "u16"
+          }
+        }
+      },
+      {
+        "id": 6,
+        "type": {
+          "def": {
+            "variant": {
+              "variants": [
+                {
+                  "name": "Bytes",
+                  "fields": [
+                    {
+                      "type": 1,
+                      "typeName": "~lib/staticarray/StaticArray<u8>"
+                    }
+                  ],
+                  "index": 5
+                },
+                {
+                  "name": "U128",
+                  "fields": [
+                    {
+                      "type": 2,
+                      "typeName": "~lib/as-bignum/integer/u128/u128"
+                    }
+                  ],
+                  "index": 4
+                },
+                {
+                  "name": "U64",
+                  "fields": [
+                    {
+                      "type": 3,
+                      "typeName": "u64"
+                    }
+                  ],
+                  "index": 3
+                },
+                {
+                  "name": "U32",
+                  "fields": [
+                    {
+                      "type": 4,
+                      "typeName": "u32"
+                    }
+                  ],
+                  "index": 2
+                },
+                {
+                  "name": "U16",
+                  "fields": [
+                    {
+                      "type": 5,
+                      "typeName": "u16"
+                    }
+                  ],
+                  "index": 1
+                },
+                {
+                  "name": "U8",
+                  "fields": [
+                    {
+                      "type": 0,
+                      "typeName": "u8"
+                    }
+                  ],
+                  "index": 0
+                }
+              ]
+            }
+          },
+          "path": [
+            "~lib/psp34-contract/types/id/Id"
+          ]
+        }
+      },
+      {
+        "id": 7,
+        "type": {
+          "def": {
+            "sequence": {
+              "type": 0
+            }
+          }
+        }
+      },
+      {
+        "id": 8,
+        "type": {
+          "def": {
+            "array": {
+              "len": 32,
+              "type": 0
+            }
+          }
+        }
+      },
+      {
+        "id": 9,
+        "type": {
+          "def": {
+            "composite": {
+              "fields": [
+                {
+                  "name": "inner",
+                  "type": 8,
+                  "typeName": "FixedArray32<u8>"
+                }
+              ]
+            }
+          },
+          "path": [
+            "~lib/ask-lang/types/types/AccountId"
+          ]
+        }
+      },
+      {
+        "id": 10,
+        "type": {
+          "def": {
+            "primitive": "str"
+          }
+        }
+      },
+      {
+        "id": 11,
+        "type": {
+          "def": {
+            "variant": {
+              "variants": [
+                {
+                  "name": "SafeTransferCheckFailed",
+                  "fields": [
+                    {
+                      "type": 10,
+                      "typeName": "~lib/string/String"
+                    }
+                  ],
+                  "index": 5
+                },
+                {
+                  "name": "TokenNotExists",
+                  "index": 4
+                },
+                {
+                  "name": "TokenExists",
+                  "index": 3
+                },
+                {
+                  "name": "NotApproved",
+                  "index": 2
+                },
+                {
+                  "name": "SelfApprove",
+                  "index": 1
+                },
+                {
+                  "name": "Custom",
+                  "fields": [
+                    {
+                      "type": 10,
+                      "typeName": "~lib/string/String"
+                    }
+                  ],
+                  "index": 0
+                }
+              ]
+            }
+          },
+          "path": [
+            "~lib/psp34-contract/types/errors/PSP34Error"
+          ]
+        }
+      },
+      {
+        "id": 12,
+        "type": {
+          "def": {
+            "tuple": []
+          }
+        }
+      },
+      {
+        "id": 13,
+        "type": {
+          "def": {
+            "variant": {
+              "variants": [
+                {
+                  "name": "Err",
+                  "fields": [
+                    {
+                      "type": 11,
+                      "typeName": "~lib/psp34-contract/types/errors/PSP34Error"
+                    }
+                  ],
+                  "index": 1
+                },
+                {
+                  "name": "Ok",
+                  "fields": [
+                    {
+                      "type": 12,
+                      "typeName": "~lib/ask-common/tuple/Empty"
+                    }
+                  ],
+                  "index": 0
+                }
+              ]
+            }
+          },
+          "path": [
+            "~lib/ask-common/result/Result<~lib/ask-common/tuple/Empty,~lib/psp34-contract/types/errors/PSP34Error>"
+          ]
+        }
+      },
+      {
+        "id": 14,
+        "type": {
+          "def": {
+            "variant": {
+              "variants": [
+                {
+                  "name": "Some",
+                  "fields": [
+                    {
+                      "type": 9,
+                      "typeName": "~lib/ask-lang/types/types/AccountId"
+                    }
+                  ],
+                  "index": 1
+                },
+                {
+                  "name": "None",
+                  "index": 0
+                }
+              ]
+            }
+          },
+          "path": [
+            "~lib/ask-common/option/Option<~lib/ask-lang/types/types/AccountId>"
+          ]
+        }
+      },
+      {
+        "id": 15,
+        "type": {
+          "def": {
+            "variant": {
+              "variants": [
+                {
+                  "name": "Some",
+                  "fields": [
+                    {
+                      "type": 6,
+                      "typeName": "~lib/psp34-contract/types/id/Id"
+                    }
+                  ],
+                  "index": 1
+                },
+                {
+                  "name": "None",
+                  "index": 0
+                }
+              ]
+            }
+          },
+          "path": [
+            "~lib/ask-common/option/Option<~lib/psp34-contract/types/id/Id>"
+          ]
+        }
+      },
+      {
+        "id": 16,
+        "type": {
+          "def": {
+            "primitive": "bool"
+          }
+        }
+      },
+      {
+        "id": 17,
+        "type": {
+          "def": {
+            "sequence": {
+              "type": 0
+            }
+          }
+        }
+      },
+      {
+        "id": 18,
+        "type": {
+          "def": {
+            "variant": {
+              "variants": [
+                {
+                  "name": "Some",
+                  "fields": [
+                    {
+                      "type": 7,
+                      "typeName": "~lib/array/Array<u8>"
+                    }
+                  ],
+                  "index": 1
+                },
+                {
+                  "name": "None",
+                  "index": 0
+                }
+              ]
+            }
+          },
+          "path": [
+            "~lib/ask-common/option/Option<~lib/array/Array<u8>>"
+          ]
+        }
+      }
+    ]
+  }
+}

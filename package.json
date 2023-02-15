@@ -20,6 +20,8 @@
   },
   "resolutions": {
     "ask-contract-runtime@0.4.0": "patch:ask-contract-runtime@npm%3A0.4.0#./.yarn/patches/ask-contract-runtime-npm-0.4.0-3a1dc4e3ab.patch",
-    "ask-lang@^0.4.0": "patch:ask-lang@npm%3A0.4.0#./.yarn/patches/ask-lang-npm-0.4.0-830b1190bb.patch"
+    "ask-lang@^0.4.0": "patch:ask-lang@npm%3A0.4.0#./.yarn/patches/ask-lang-npm-0.4.0-830b1190bb.patch",
+    "ask-transform": "file:../ask/ts-packages/transform",
+    "ask-contract-metadata": "file:../ask/ts-packages/contract-metadata"
   }
 }

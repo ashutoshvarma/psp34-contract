@@ -479,10 +479,28 @@ asbuild@ashutoshvarma/asbuild:
   languageName: node
   linkType: hard
 
-"ask-contract-metadata@npm:0.4.0":
+"ask-common@workspace:*, ask-common@workspace:packages/common":
+  version: 0.0.0-use.local
+  resolution: "ask-common@workspace:packages/common"
+  dependencies:
+    "@typescript-eslint/eslint-plugin": ^4.22.0
+    "@typescript-eslint/parser": ^4.22.0
+    as-buffers: ^0.1.3
+    as-container: ^0.6.1
+    as-serde-scale: ^0.2.0
+    asbuild: ashutoshvarma/asbuild
+    ask-lang: ^0.4.0
+    ask-transform: ^0.4.0
+    assemblyscript: ^0.19
+    eslint: ^7.17.0
+    typescript: ^4.3.5
+  languageName: unknown
+  linkType: soft
+
+"ask-contract-metadata@file:../ask/ts-packages/contract-metadata::locator=ask-psp34%40workspace%3A.":
   version: 0.4.0
-  resolution: "ask-contract-metadata@npm:0.4.0"
-  checksum: 280f704d390f292090583797faa288459ed246215a51cc7baf6b85fc41e38fb2be2e910ee7dc547dda6cc29e56bfcd5a172012ae948a562a51ee33509af32a24
+  resolution: "ask-contract-metadata@file:../ask/ts-packages/contract-metadata#../ask/ts-packages/contract-metadata::hash=206dd7&locator=ask-psp34%40workspace%3A."
+  checksum: b72a67a482ce98683899d8f816a732117b6f826c5893d782bd06554ac57dad3057d6da5c3d7feea7912221910ae4553ef6a0bb65c0ac19c86b033bb1149664a7
   languageName: node
   linkType: hard
 
@@ -532,9 +550,9 @@ asbuild@ashutoshvarma/asbuild:
   languageName: unknown
   linkType: soft
 
-"ask-transform@npm:^0.4.0":
+"ask-transform@file:../ask/ts-packages/transform::locator=ask-psp34%40workspace%3A.":
   version: 0.4.0
-  resolution: "ask-transform@npm:0.4.0"
+  resolution: "ask-transform@file:../ask/ts-packages/transform#../ask/ts-packages/transform::hash=b9072b&locator=ask-psp34%40workspace%3A."
   dependencies:
     ask-contract-metadata: 0.4.0
     assemblyscript: ^0.19
@@ -545,7 +563,7 @@ asbuild@ashutoshvarma/asbuild:
   peerDependencies:
     assemblyscript: ^0.19
     visitor-as: 0.8
-  checksum: 8dba81537663e7299d3f4b87e952adec62de29a4624a80c3aa87c127a18adcbc4af80473d270068d22e5f529c18e1910007359a03611a5745a7030d468156aea
+  checksum: 57019957fe6ffdf79f86c1bf184fce0c37d2bab45c79424dc7783ca7b7346c25f9d869febc74f40d8d04a8294fd69f0f912f45e96a429e6d44647c840f6215e9
   languageName: node
   linkType: hard
 
@@ -978,7 +996,9 @@ asbuild@ashutoshvarma/asbuild:
     "@as-pect/cli": ^6
     "@typescript-eslint/eslint-plugin": ^4.22.0
     "@typescript-eslint/parser": ^4.22.0
+    as-serde-scale: ^0.2.0
     asbuild: ashutoshvarma/asbuild
+    ask-common: "workspace:*"
     ask-lang: ^0.4.0
     ask-transform: ^0.4.0
     assemblyscript: ^0.19
@@ -1121,11 +1141,11 @@ asbuild@ashutoshvarma/asbuild:
   linkType: hard
 
 "globals@npm:^13.6.0, globals@npm:^13.9.0":
-  version: 13.19.0
-  resolution: "globals@npm:13.19.0"
+  version: 13.20.0
+  resolution: "globals@npm:13.20.0"
   dependencies:
     type-fest: ^0.20.2
-  checksum: a000dbd00bcf28f0941d8a29c3522b1c3b8e4bfe4e60e262c477a550c3cbbe8dbe2925a6905f037acd40f9a93c039242e1f7079c76b0fd184bc41dcc3b5c8e2e
+  checksum: ad1ecf914bd051325faad281d02ea2c0b1df5d01bd94d368dcc5513340eac41d14b3c61af325768e3c7f8d44576e72780ec0b6f2d366121f8eec6e03c3a3b97a
   languageName: node
   linkType: hard
 
@@ -1552,13 +1572,13 @@ asbuild@ashutoshvarma/asbuild:
   version: 0.0.0-use.local
   resolution: "psp34-contract@workspace:packages/psp34"
   dependencies:
-    "@as-pect/cli": ^6
     "@typescript-eslint/eslint-plugin": ^4.22.0
     "@typescript-eslint/parser": ^4.22.0
     as-buffers: ^0.1.3
     as-container: ^0.6.1
     as-serde-scale: ^0.2.0
     asbuild: ashutoshvarma/asbuild
+    ask-common: "workspace:*"
     ask-lang: ^0.4.0
     ask-transform: ^0.4.0
     assemblyscript: ^0.19
@@ -1859,22 +1879,22 @@ asbuild@ashutoshvarma/asbuild:
   linkType: hard
 
 "typescript@npm:^4.3.5":
-  version: 4.9.4
-  resolution: "typescript@npm:4.9.4"
+  version: 4.9.5
+  resolution: "typescript@npm:4.9.5"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: e782fb9e0031cb258a80000f6c13530288c6d63f1177ed43f770533fdc15740d271554cdae86701c1dd2c83b082cea808b07e97fd68b38a172a83dbf9e0d0ef9
+  checksum: ee000bc26848147ad423b581bd250075662a354d84f0e06eb76d3b892328d8d4440b7487b5a83e851b12b255f55d71835b008a66cbf8f255a11e4400159237db
   languageName: node
   linkType: hard
 
 "typescript@patch:typescript@^4.3.5#~builtin<compat/typescript>":
-  version: 4.9.4
-  resolution: "typescript@patch:typescript@npm%3A4.9.4#~builtin<compat/typescript>::version=4.9.4&hash=ad5954"
+  version: 4.9.5
+  resolution: "typescript@patch:typescript@npm%3A4.9.5#~builtin<compat/typescript>::version=4.9.5&hash=ad5954"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 1caaea6cb7f813e64345190fddc4e6c924d0b698ab81189b503763c4a18f7f5501c69362979d36e19c042d89d936443e768a78b0675690b35eb663d19e0eae71
+  checksum: 8f6260acc86b56bfdda6004bc53f32ea548f543e8baef7071c8e34d29d292f3e375c8416556c8de10b24deef6933cd1c16a8233dc84a3dd43a13a13265d0faab
   languageName: node
   linkType: hard
 

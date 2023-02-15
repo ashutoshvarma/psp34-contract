@@ -1,11 +1,8 @@
+import { Empty, Result } from 'ask-common';
 import { AccountId } from 'ask-lang';
-import { Id, PSP34 } from 'psp34-contract';
+import { Id, PSP34, PSP34Error, Balances } from 'psp34-contract';
 
 // NOTE:-
-// Due to use of generic parameter in PSP34 class
-// it is necesseary to import 'Balances' so that
-// ask-transform can generate valid code.
-import { Balances /* IMPORTANT */ } from 'psp34-contract';
 
 @contract
 export class Contract extends PSP34 {
@@ -33,17 +30,12 @@ export class Contract extends PSP34 {
   }
 
   @message({ mutates: true })
-  set_collection_attribute(key: Array<u8>, value: Array<u8>): void {
-    this._set_attribute(null, key, value);
-  }
-
-  @message({ mutates: true })
   mint(to: AccountId, id: Id): void {
     this._mint_to(to, id);
   }
 
   @message({ mutates: true })
-  burn(to: AccountId, id: Id): void {
-    this._burn_from(to, id);
+  burn(to: AccountId, id: Id): Result<Empty, PSP34Error> {
+    return this._burn_from(to, id);
   }
 }

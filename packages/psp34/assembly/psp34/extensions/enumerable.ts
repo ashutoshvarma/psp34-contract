@@ -1,15 +1,14 @@
+import { Result } from 'as-container';
+import { Option, Tuple1 } from 'ask-common';
 import {
-  AccountId,
-  Balance,
-  HashKeccak256,
+  AccountId, HashKeccak256,
   Mapping,
   u128,
-  Vector,
-  ZERO_ACCOUNT,
-} from "ask-lang";
-import { IBalances } from "../../interfaces/balances";
-import { Id, Owner } from "../../types";
-import { PSP34 } from "../base";
+  Vector
+} from 'ask-lang';
+import { IBalances } from '../../interfaces/balances';
+import { Id, Owner, PSP34Error } from '../../types';
+import { PSP34 } from '../base';
 
 /**
  * Balances implementation for enumerable extension
@@ -28,29 +27,32 @@ export class EnumerableBalances implements IBalances {
   _owned_tokens: Mapping<AccountId, Map<u32, Id>, HashKeccak256> =
     new Mapping();
   // Mapping from token ID to index of the owner tokens list
-  _owned_tokens_index: Mapping<Id, u128, HashKeccak256> = new Mapping();
+  _owned_tokens_index: Mapping<Id, u32, HashKeccak256> = new Mapping();
 
-  _owned_tokens_count: Mapping<AccountId, u128, HashKeccak256> = new Mapping();
+  _owned_tokens_count: Mapping<AccountId, Tuple1<u32>, HashKeccak256> =
+    new Mapping();
 
   constructor() {}
 
   @inline
-  balance_of(owner: Owner): u128 {
+  balance_of(owner: Owner): u32 {
     const balance = this._owned_tokens_count.getOrNull(owner);
-    return balance === null ? u128.from(0) : balance;
+    return balance === null ? 0 : balance.val0;
   }
 
   @inline
   increase_balance(owner: Owner, _id: Id, i_ncrease_supply: bool): void {
-    const to_balance: u128 = this.balance_of(owner);
-    this._owned_tokens_count.set(owner, to_balance.preInc());
+    const to_balance: u32 = this.balance_of(owner) + 1;
+    this._owned_tokens_count.set(owner, new Tuple1(to_balance));
   }
 
   @inline
   decrease_balance(owner: Owner, _id: Id, _decrease_supply: bool): void {
-    const from_balance: u128 = this.balance_of(owner);
+    assert(this.balance_of(owner) > 0);
+
+    const from_balance: u32 = this.balance_of(owner) - 1;
     // TODO: check for underflow
-    this._owned_tokens_count.set(owner, from_balance.preDec());
+    this._owned_tokens_count.set(owner, new Tuple1(from_balance));
   }
 
   @inline
@@ -59,22 +61,30 @@ export class EnumerableBalances implements IBalances {
   }
 
   @inline
-  before_token_transfer(from: AccountId, to: AccountId, id: u128): void {
-    if (from === ZERO_ACCOUNT) {
+  before_token_transfer(
+    from: Option<AccountId>,
+    to: Option<AccountId>,
+    id: Id,
+  ): void {
+    if (from.isNone) {
       this._add_token_to_all_list(id);
     } else if (from !== to) {
-      this._remove_token_from_owner_lists(from, id);
+      this._remove_token_from_owner_lists(from.unwrap(), id);
     }
 
-    if (to === ZERO_ACCOUNT) {
+    if (to.isNone) {
       this._remove_tokens_from_all_tokens(id);
     } else if (to !== from) {
-      this._add_token_to_owner_lists(to, id);
+      this._add_token_to_owner_lists(to.unwrap(), id);
     }
   }
 
   @inline
-  after_token_transfer(_from: AccountId, _to: AccountId, _id: u128): void {}
+  after_token_transfer(
+    _from: Option<AccountId>,
+    _to: Option<AccountId>,
+    _id: Id,
+  ): void {}
 
   // _owned_tokens[owner]
   _get_tokens_map(owner: AccountId): Map<u32, Id> {
@@ -83,24 +93,24 @@ export class EnumerableBalances implements IBalances {
   }
 
   // _owned_tokens[owner][idx] = id
-  _set_token(owner: AccountId, idx: Id, id: Id): void {
+  _set_token(owner: AccountId, idx: u32, id: Id): void {
     const tokens = this._get_tokens_map(owner);
-    tokens.set(idx.toU32(), id);
+    tokens.set(idx, id);
     this._owned_tokens.set(owner, tokens);
   }
 
   // delete _owned_tokens[owner][idx]
-  _delete_token(owner: AccountId, idx: Id): void {
+  _delete_token(owner: AccountId, idx: u32): void {
     const tokens = this._get_tokens_map(owner);
-    tokens.delete(idx.toU32());
+    tokens.delete(idx);
     this._owned_tokens.set(owner, tokens);
   }
 
   // _owned_tokens[owner][idx]
-  _get_token(owner: AccountId, idx: Id): Id {
+  _get_token(owner: AccountId, idx: u32): Id {
     // return this._owned_tokens.get(owner).get(idx);
     const tokens = this._get_tokens_map(owner);
-    return tokens.get(idx.toU32());
+    return tokens.get(idx);
   }
 
   _add_token_to_owner_lists(to: AccountId, id: Id): void {
@@ -115,7 +125,7 @@ export class EnumerableBalances implements IBalances {
   }
 
   _remove_token_from_owner_lists(from: AccountId, id: Id): void {
-    const last_token_index = u128.sub(this.balance_of(from), u128.One);
+    const last_token_index = this.balance_of(from) - 1;
     const token_index = this._owned_tokens_index.get(id);
 
     // // if (token_index !== last_token_index) {
@@ -165,11 +175,14 @@ export class PSP34Enumerable extends PSP34<EnumerableBalances> {
    * @returns token id
    */
   @message()
-  owners_token_by_index(owner: AccountId, idx: u32): Balance {
-    if (u128.from(idx) >= this.balance_of(owner)) {
-      throw `PSP34Error::TokenNotExists`;
+  owners_token_by_index(owner: AccountId, idx: u32): Result<Id, PSP34Error> {
+    if (idx >= this.balance_of(owner)) {
+      // throw `PSP34Error::TokenNotExists`;
+      return Result.Err<Id, PSP34Error>(PSP34Error.TokenNotExists());
     }
-    return this.data.balances._owned_tokens.get(owner).get(idx);
+    return Result.Ok<Id, PSP34Error>(
+      this.data.balances._owned_tokens.get(owner).get(idx),
+    );
   }
 
   /**
@@ -178,10 +191,11 @@ export class PSP34Enumerable extends PSP34<EnumerableBalances> {
    * @returns token id
    */
   @message()
-  token_by_index(idx: u32): Id {
+  token_by_index(idx: u32): Result<Id, PSP34Error> {
     if (u128.from(idx) >= this.total_supply()) {
-      throw `PSP34Error::TokenNotExists`;
+      // throw `PSP34Error::TokenNotExists`;
+      return Result.Err<Id, PSP34Error>(PSP34Error.TokenNotExists());
     }
-    return this.data.balances._all_tokens.get(idx);
+    return Result.Ok<Id, PSP34Error>(this.data.balances._all_tokens.get(idx));
   }
 }
