@@ -30,8 +30,8 @@ export class Contract extends PSP34 {
   }
 
   @message({ mutates: true })
-  mint(to: AccountId, id: Id): void {
-    this._mint_to(to, id);
+  mint(to: AccountId, id: Id): Result<Empty, PSP34Error> {
+    return this._mint_to(to, id);
   }
 
   @message({ mutates: true })
