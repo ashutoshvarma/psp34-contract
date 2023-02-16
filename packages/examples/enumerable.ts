@@ -1,35 +1,25 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
+import { Empty, Option, Result } from 'ask-common';
 import { AccountId, env } from 'ask-lang';
-import { Id, PSP34Enumerable } from 'psp34-contract';
+import { Id, PSP34Enumerable, PSP34Error } from 'psp34-contract';
 
 @event({ id: 1 })
 class TransferEvent {
-  from: AccountId;
-  to: AccountId;
-
-  id: Id;
-
-  constructor(from: AccountId, to: AccountId, id: Id) {
-    this.from = from;
-    this.to = to;
-    this.id = id;
-  }
+  constructor(
+    public from: Option<AccountId>,
+    public to: Option<AccountId>,
+    public id: Id,
+  ) {}
 }
 
 @event({ id: 2 })
 class ApprovalEvent {
-  from: AccountId;
-  to: AccountId;
-
-  id: string;
-  approved: bool;
-
-  constructor(from: AccountId, to: AccountId, id: string, approved: bool) {
-    this.from = from;
-    this.to = to;
-    this.id = id;
-    this.approved = approved;
-  }
+  constructor(
+    public from: AccountId,
+    public to: AccountId,
+    public id: Option<Id>,
+    public approved: bool,
+  ) {}
 }
 
 @contract
@@ -58,21 +48,20 @@ export class Contract extends PSP34Enumerable {
   }
 
   @message({ mutates: true })
-  set_collection_attribute(key: Array<u8>, value: Array<u8>): void {
-    this._set_attribute(null, key, value);
+  mint(to: AccountId, id: Id): Result<Empty, PSP34Error> {
+    return this._mint_to(to, id);
   }
 
   @message({ mutates: true })
-  mint(to: AccountId, id: Id): void {
-    this._mint_to(to, id);
+  burn(to: AccountId, id: Id): Result<Empty, PSP34Error> {
+    return this._burn_from(to, id);
   }
 
-  @message({ mutates: true })
-  burn(to: AccountId, id: Id): void {
-    this._burn_from(to, id);
-  }
-
-  _emit_transfer_event(_from: AccountId, _to: AccountId, _id: Id): void {
+  _emit_transfer_event(
+    _from: Option<AccountId>,
+    _to: Option<AccountId>,
+    _id: Id,
+  ): void {
     // @ts-ignore
     env().emitEvent(new TransferEvent(_from, _to, _id));
   }
@@ -80,17 +69,12 @@ export class Contract extends PSP34Enumerable {
   _emit_approval_event(
     _from: AccountId,
     _to: AccountId,
-    _id: Id | null,
+    _id: Option<Id>,
     _approved: bool,
   ): void {
     env().emitEvent(
       // @ts-ignore
-      new ApprovalEvent(
-        _from,
-        _to,
-        _id === null ? '' : _id.toString(),
-        _approved,
-      ),
+      new ApprovalEvent(_from, _to, _id, _approved),
     );
   }
 }

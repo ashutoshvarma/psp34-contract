@@ -1,11 +1,9 @@
 import { Empty, Result } from 'ask-common';
 import { AccountId } from 'ask-lang';
-import { Id, PSP34, PSP34Error, Balances } from 'psp34-contract';
-
-// NOTE:-
+import { Balances, Id, PSP34, PSP34Error } from 'psp34-contract';
 
 @contract
-export class Contract extends PSP34 {
+export class Contract extends PSP34<Balances> {
   constructor() {
     super();
   }
@@ -14,11 +12,10 @@ export class Contract extends PSP34 {
   default(): void {
     super.default();
 
-    // TODO: ask! has no counterpart for `ink_lang::codegen::initialize_contract`
-    //       so modifying non-primitive types inside constructor panics.
-
+    // // TODO: ask! has no counterpart for `ink_lang::codegen::initialize_contract`
+    // //       so modifying non-primitive types inside constructor panics.
     // super._set_attribute(
-    //   null,
+    //   super.collection_id(),
     //   BytesBuffer.from(String.UTF8.encode("name")).toArray(),
     //   BytesBuffer.from(String.UTF8.encode("contractv1")).toArray()
     // );
