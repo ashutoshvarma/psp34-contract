@@ -1,5 +1,7 @@
 import { instantiateZero } from './util';
 
+@packedLayout()
+@spreadLayout()
 @tuple()
 export class Empty {
   // empty tuple
@@ -15,6 +17,8 @@ export class Empty {
 }
 
 // Tuple 1
+@packedLayout()
+@spreadLayout()
 @tuple()
 export class Tuple1<T> {
   constructor(public val0: T = instantiateZero<T>()) {}
@@ -36,6 +40,8 @@ export class Tuple1<T> {
 }
 
 // Tuple 2
+@packedLayout()
+@spreadLayout()
 @tuple()
 export class Tuple2<T, V> {
   constructor(
@@ -62,6 +68,8 @@ export class Tuple2<T, V> {
 }
 
 // Tuple 3
+@packedLayout()
+@spreadLayout()
 @tuple()
 export class Tuple3<T, V, U> {
   constructor(

@@ -2,6 +2,18 @@
 
 // import { Resultable } from 'as-container';
 
+import {
+  clearPacked,
+  clearSpread,
+  IKey,
+  PackedLayout,
+  pullPacked,
+  pullSpread,
+  pushPacked,
+  pushSpread,
+  spreadFootprint,
+  SpreadLayout,
+} from 'ask-lang';
 import { Option } from './option';
 import { Tuple1 } from './tuple';
 import { instantiateZero, MapFn, RecoveryWithErrorFn } from './util';
@@ -16,8 +28,9 @@ export type FlatMapErrFn<O, E, F> = MapFn<E, Result<O, F>>;
  *
  * The Result version can both wrap the primitive and reference type, but it will increase reference overhead
  */
+
 @enumeration()
-export class Result<O, E> {
+export class Result<O, E> implements SpreadLayout, PackedLayout {
   @variant({ name: 'Ok' })
   protected _ok: Tuple1<O>;
   @variant({ name: 'Err' })
@@ -217,5 +230,79 @@ export class Result<O, E> {
       this._err = new Tuple1<E>(deserializer.deserialize<E>());
     }
     return this;
+  }
+
+  // storage layouts
+
+  pullPacked<K extends IKey>(key: K): void {
+    pullPacked<bool, K>(this._isOk, key);
+    if (this._isOk === true) {
+      pullPacked<Tuple1<O>, K>(this._ok, key);
+    } else {
+      pullPacked<Tuple1<E>, K>(this._err, key);
+    }
+  }
+  pushPacked<K extends IKey>(key: K): void {
+    pushPacked<bool, K>(this._isOk, key);
+    if (this._isOk === true) {
+      pushPacked<Tuple1<O>, K>(this._ok, key);
+    } else {
+      pushPacked<Tuple1<E>, K>(this._err, key);
+    }
+  }
+  clearPacked<K extends IKey>(key: K): void {
+    clearPacked<bool, K>(this._isOk, key);
+    if (this._isOk === true) {
+      clearPacked<Tuple1<O>, K>(this._ok, key);
+    } else {
+      clearPacked<Tuple1<E>, K>(this._err, key);
+    }
+  }
+
+  pullSpread<K extends IKey>(key: K): void {
+    // @ts-ignore
+    this._isOk = pullSpread<bool, K>(key);
+    if (this._isOk === true) {
+      // @ts-ignore
+      this._ok = pullSpread<Tuple1<O>, K>(key);
+    } else {
+      // @ts-ignore
+      this._err = pullSpread<Tuple1<E>, K>(key);
+    }
+  }
+
+  pushSpread<K extends IKey>(key: K): void {
+    // @ts-ignore
+    pushSpread<bool, K>(this._isOk, key);
+    if (this._isOk === true) {
+      // @ts-ignore
+      pushSpread<Tuple1<O>, K>(this._ok, key);
+    } else {
+      // @ts-ignore
+      pushSpread<Tuple1<E>, K>(this._err, key);
+    }
+  }
+
+  clearSpread<K extends IKey>(key: K): void {
+    // @ts-ignore
+    clearSpread<bool, K>(this._isOk, key);
+    if (this._isOk === true) {
+      // @ts-ignore
+      clearSpread<Tuple1<O>, K>(this._ok, key);
+    } else {
+      // @ts-ignore
+      clearSpread<Tuple1<E>, K>(this._err, key);
+    }
+  }
+
+  @inline
+  FOOTPRINT(): u64 {
+    // @ts-ignore
+    return 1 + max(spreadFootprint<Tuple1<O>>(), spreadFootprint<Tuple1<O>>());
+  }
+
+  @inline
+  REQUIRES_DEEP_CLEAN_UP(): bool {
+    return true;
   }
 }

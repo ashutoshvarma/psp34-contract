@@ -1,6 +1,7 @@
 import { Deserializer, Serializer } from 'as-serde';
 import { instantiateZero, Tuple1 } from 'ask-common';
-import { u128 } from 'ask-lang';
+import { PackedLayout, SpreadLayout, u128 } from 'ask-lang';
+import * as lang from 'ask-lang';
 
 export enum IdEnum {
   U8,
@@ -19,7 +20,7 @@ type U128 = Tuple1<u128>;
 type Bytes = Tuple1<StaticArray<u8>>;
 
 @enumeration()
-export class Id {
+export class Id implements SpreadLayout, PackedLayout {
   public type: IdEnum = IdEnum.U8;
 
   @variant({ name: 'U8' })
@@ -108,6 +109,25 @@ export class Id {
     return this._bytes;
   }
 
+  toString(): string {
+    switch (this.type) {
+      case IdEnum.U8:
+        return 'U8(' + this._u8.val0.toString() + ')';
+      case IdEnum.U16:
+        return 'U16(' + this._u16.val0.toString() + ')';
+      case IdEnum.U32:
+        return 'U32(' + this._u32.val0.toString() + ')';
+      case IdEnum.U64:
+        return 'U64(' + this._u64.val0.toString() + ')';
+      case IdEnum.U128:
+        return 'U128(' + this._u128.val0.toString() + ')';
+      case IdEnum.Bytes:
+        return 'Bytes(' + this._bytes.val0.toString() + ')';
+      default:
+        throw 'NotReachable';
+    }
+  }
+
   serialize<__R, __S extends Serializer<__R>>(serializer: __S): __R {
     serializer.serializeU8(this.type as u8);
     switch (this.type) {
@@ -175,5 +195,263 @@ export class Id {
       }
     }
     return this;
+  }
+
+  // STORAGE LAYOUTS
+  pullSpread<__K extends lang.IKey>(key: __K): void {
+    // @ts-ignore
+    this.type = lang.pullSpread<IdEnum, __K>(key);
+    switch (this.type) {
+      case IdEnum.U8: {
+        // @ts-ignore
+        this._u8 = lang.pullSpread<U8, __K>(key);
+        break;
+      }
+      case IdEnum.U16: {
+        // @ts-ignore
+        this._u16 = lang.pullSpread<U16, __K>(key);
+        break;
+      }
+      case IdEnum.U32: {
+        // @ts-ignore
+        this._u32 = lang.pullSpread<U32, __K>(key);
+        break;
+      }
+      case IdEnum.U64: {
+        // @ts-ignore
+        this._u64 = lang.pullSpread<U64, __K>(key);
+        break;
+      }
+      case IdEnum.U128: {
+        // @ts-ignore
+        this._u128 = lang.pullSpread<U128, __K>(key);
+        break;
+      }
+      case IdEnum.Bytes: {
+        // @ts-ignore
+        this._bytes = lang.pullSpread<Bytes, __K>(key);
+        break;
+      }
+      default: {
+        // TODO
+      }
+    }
+  }
+
+  pushSpread<__K extends lang.IKey>(key: __K): void {
+    // @ts-ignore
+    lang.pushSpread<IdEnum, __K>(this.type, key);
+    switch (this.type) {
+      case IdEnum.U8: {
+        // @ts-ignore
+        lang.pushSpread<U8, __K>(this._u8, key);
+        break;
+      }
+      case IdEnum.U16: {
+        // @ts-ignore
+        lang.pushSpread<U16, __K>(this._u16, key);
+        break;
+      }
+      case IdEnum.U32: {
+        // @ts-ignore
+        lang.pushSpread<U32, __K>(this._u32, key);
+        break;
+      }
+      case IdEnum.U64: {
+        // @ts-ignore
+        lang.pushSpread<U64, __K>(this._u64, key);
+        break;
+      }
+      case IdEnum.U128: {
+        // @ts-ignore
+        lang.pushSpread<U128, __K>(this._u128, key);
+        break;
+      }
+      case IdEnum.Bytes: {
+        // @ts-ignore
+        lang.pushSpread<Bytes, __K>(this._bytes, key);
+        break;
+      }
+      default: {
+        // TODO
+      }
+    }
+  }
+
+  clearSpread<__K extends lang.IKey>(key: __K): void {
+    // @ts-ignore
+    lang.clearSpread<IdEnum, __K>(this.type, key);
+    switch (this.type) {
+      case IdEnum.U8: {
+        // @ts-ignore
+        lang.clearSpread<U8, __K>(this._u8, key);
+        break;
+      }
+      case IdEnum.U16: {
+        // @ts-ignore
+        lang.clearSpread<U16, __K>(this._u16, key);
+        break;
+      }
+      case IdEnum.U32: {
+        // @ts-ignore
+        lang.clearSpread<U32, __K>(this._u32, key);
+        break;
+      }
+      case IdEnum.U64: {
+        // @ts-ignore
+        lang.clearSpread<U64, __K>(this._u64, key);
+        break;
+      }
+      case IdEnum.U128: {
+        // @ts-ignore
+        lang.clearSpread<U128, __K>(this._u128, key);
+        break;
+      }
+      case IdEnum.Bytes: {
+        // @ts-ignore
+        lang.clearSpread<Bytes, __K>(this._bytes, key);
+        break;
+      }
+      default: {
+        // TODO
+      }
+    }
+  }
+
+  FOOTPRINT(): u64 {
+    return (
+      1 + 2
+      // max(
+      //   lang.spreadFootprint<IdEnum>(),
+      //   lang.spreadFootprint<U8>(),
+      //   lang.spreadFootprint<U16>(),
+      //   lang.spreadFootprint<U32>(),
+      //   lang.spreadFootprint<U64>(),
+      //   lang.spreadFootprint<U128>(),
+      //   lang.spreadFootprint<Bytes>(),
+      // )
+    );
+  }
+
+  REQUIRES_DEEP_CLEAN_UP(): bool {
+    return true;
+  }
+
+  pullPacked<__K extends lang.IKey>(key: __K): void {
+    // @ts-ignore
+    lang.pullPacked<IdEnum, __K>(this.type, key);
+    switch (this.type) {
+      case IdEnum.U8: {
+        // @ts-ignore
+        lang.pullPacked<U8, __K>(this._u8, key);
+        break;
+      }
+      case IdEnum.U16: {
+        // @ts-ignore
+        lang.pullPacked<U16, __K>(this._u16, key);
+        break;
+      }
+      case IdEnum.U32: {
+        // @ts-ignore
+        lang.pullPacked<U32, __K>(this._u32, key);
+        break;
+      }
+      case IdEnum.U64: {
+        // @ts-ignore
+        lang.pullPacked<U64, __K>(this._u64, key);
+        break;
+      }
+      case IdEnum.U128: {
+        // @ts-ignore
+        lang.pullPacked<U128, __K>(this._u128, key);
+        break;
+      }
+      case IdEnum.Bytes: {
+        // @ts-ignore
+        lang.pullPacked<Bytes, __K>(this._bytes, key);
+        break;
+      }
+      default: {
+        // TODO
+      }
+    }
+  }
+  pushPacked<__K extends lang.IKey>(key: __K): void {
+    // @ts-ignore
+    lang.pushPacked<IdEnum, __K>(this.type, key);
+    switch (this.type) {
+      case IdEnum.U8: {
+        // @ts-ignore
+        lang.pushPacked<U8, __K>(this._u8, key);
+        break;
+      }
+      case IdEnum.U16: {
+        // @ts-ignore
+        lang.pushPacked<U16, __K>(this._u16, key);
+        break;
+      }
+      case IdEnum.U32: {
+        // @ts-ignore
+        lang.pushPacked<U32, __K>(this._u32, key);
+        break;
+      }
+      case IdEnum.U64: {
+        // @ts-ignore
+        lang.pushPacked<U64, __K>(this._u64, key);
+        break;
+      }
+      case IdEnum.U128: {
+        // @ts-ignore
+        lang.pushPacked<U128, __K>(this._u128, key);
+        break;
+      }
+      case IdEnum.Bytes: {
+        // @ts-ignore
+        lang.pushPacked<Bytes, __K>(this._bytes, key);
+        break;
+      }
+      default: {
+        // TODO
+      }
+    }
+  }
+  clearPacked<__K extends lang.IKey>(key: __K): void {
+    // @ts-ignore
+    lang.clearPacked<IdEnum, __K>(this.type, key);
+    switch (this.type) {
+      case IdEnum.U8: {
+        // @ts-ignore
+        lang.clearPacked<U8, __K>(this._u8, key);
+        break;
+      }
+      case IdEnum.U16: {
+        // @ts-ignore
+        lang.clearPacked<U16, __K>(this._u16, key);
+        break;
+      }
+      case IdEnum.U32: {
+        // @ts-ignore
+        lang.clearPacked<U32, __K>(this._u32, key);
+        break;
+      }
+      case IdEnum.U64: {
+        // @ts-ignore
+        lang.clearPacked<U64, __K>(this._u64, key);
+        break;
+      }
+      case IdEnum.U128: {
+        // @ts-ignore
+        lang.clearPacked<U128, __K>(this._u128, key);
+        break;
+      }
+      case IdEnum.Bytes: {
+        // @ts-ignore
+        lang.clearPacked<Bytes, __K>(this._bytes, key);
+        break;
+      }
+      default: {
+        // TODO
+      }
+    }
   }
 }

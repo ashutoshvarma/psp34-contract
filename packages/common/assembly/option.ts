@@ -3,6 +3,18 @@
 import { Tuple1 } from './tuple';
 import { instantiateZero, MapFn, RecoveryFn } from './util';
 import { Optionable } from 'as-container';
+import {
+  clearPacked,
+  clearSpread,
+  IKey,
+  PackedLayout,
+  pullPacked,
+  pullSpread,
+  pushPacked,
+  pushSpread,
+  spreadFootprint,
+  SpreadLayout,
+} from 'ask-lang';
 
 export type FlatMapFn<T, U> = MapFn<T, Option<U>>;
 
@@ -14,7 +26,7 @@ export type FlatMapFn<T, U> = MapFn<T, Option<U>>;
  */
 
 @enumeration()
-export class Option<T> implements Optionable<T> {
+export class Option<T> implements Optionable<T>, SpreadLayout, PackedLayout {
   @variant({ name: 'None' })
   protected _isNone: bool;
   @variant({ name: 'Some' })
@@ -174,5 +186,69 @@ export class Option<T> implements Optionable<T> {
       this._val = new Tuple1<T>(deserializer.deserialize<T>());
     }
     return this;
+  }
+
+  // packed layout
+  pullPacked<K extends IKey>(key: K): void {
+    if (this.isSome) {
+      pullPacked<Tuple1<T>, K>(this._val, key);
+    }
+  }
+
+  pushPacked<K extends IKey>(key: K): void {
+    if (this.isSome) {
+      pushPacked<Tuple1<T>, K>(this._val, key);
+    }
+  }
+
+  clearPacked<K extends IKey>(key: K): void {
+    if (this.isSome) {
+      clearPacked<Tuple1<T>, K>(this._val, key);
+    }
+  }
+
+  // spread layout
+  pullSpread<K extends IKey>(key: K): void {
+    // @ts-ignore
+    this._isNone = pullSpread<bool, K>(key);
+    if (this._isNone) {
+      // @ts-ignore
+      key.add(spreadFootprint<Tuple1<T>>());
+    } else {
+      // @ts-ignore
+      this._val = pullSpread<Tuple1<T>, K>(key);
+    }
+  }
+
+  pushSpread<K extends IKey>(key: K): void {
+    // @ts-ignore
+    pushSpread<bool, K>(this._isNone, key);
+    if (this._isNone) {
+      // @ts-ignore
+      key.add(spreadFootprint<Tuple1<T>>());
+    } else {
+      // @ts-ignore
+      pushSpread<Tuple1<T>, K>(this._val, key);
+    }
+  }
+  clearSpread<K extends IKey>(key: K): void {
+    // @ts-ignore
+    pushSpread<bool, K>(this._isNone, key);
+    if (this._isNone) {
+      // @ts-ignore
+      key.add(spreadFootprint<Tuple1<T>>());
+    } else {
+      // @ts-ignore
+      clearSpread<bool, K>(this._isNone, key);
+    }
+  }
+
+  @inline
+  FOOTPRINT(): u64 {
+    // @ts-ignore
+    return 1 + spreadFootprint<Tuple1<T>>();
+  }
+  REQUIRES_DEEP_CLEAN_UP(): bool {
+    throw new Error('Method not implemented.');
   }
 }

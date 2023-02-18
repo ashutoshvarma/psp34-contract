@@ -27,7 +27,6 @@
   },
   "dependencies": {
     "as-buffers": "^0.1.3",
-    "as-container": "^0.6.1",
     "as-serde-scale": "^0.2.0",
     "ask-common": "workspace:*",
     "ask-lang": "^0.4.0"
