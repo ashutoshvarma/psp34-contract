@@ -12,7 +12,7 @@ import {
   pullSpread,
   pushPacked,
   pushSpread,
-  spreadFootprint,
+  // spreadFootprint,
   SpreadLayout,
 } from 'ask-lang';
 
@@ -213,7 +213,8 @@ export class Option<T> implements Optionable<T>, SpreadLayout, PackedLayout {
     this._isNone = pullSpread<bool, K>(key);
     if (this._isNone) {
       // @ts-ignore
-      key.add(spreadFootprint<Tuple1<T>>());
+      // key.add(spreadFootprint<Tuple1<T>>());
+      ++key;
     } else {
       // @ts-ignore
       this._val = pullSpread<Tuple1<T>, K>(key);
@@ -225,7 +226,8 @@ export class Option<T> implements Optionable<T>, SpreadLayout, PackedLayout {
     pushSpread<bool, K>(this._isNone, key);
     if (this._isNone) {
       // @ts-ignore
-      key.add(spreadFootprint<Tuple1<T>>());
+      // key.add(spreadFootprint<Tuple1<T>>());
+      ++key;
     } else {
       // @ts-ignore
       pushSpread<Tuple1<T>, K>(this._val, key);
@@ -236,19 +238,20 @@ export class Option<T> implements Optionable<T>, SpreadLayout, PackedLayout {
     pushSpread<bool, K>(this._isNone, key);
     if (this._isNone) {
       // @ts-ignore
-      key.add(spreadFootprint<Tuple1<T>>());
+      // key.add(spreadFootprint<Tuple1<T>>());
+      ++key;
     } else {
       // @ts-ignore
       clearSpread<bool, K>(this._isNone, key);
     }
   }
 
-  @inline
-  FOOTPRINT(): u64 {
-    // @ts-ignore
-    return 1 + spreadFootprint<Tuple1<T>>();
-  }
-  REQUIRES_DEEP_CLEAN_UP(): bool {
-    throw new Error('Method not implemented.');
-  }
+  // @inline
+  // FOOTPRINT(): u64 {
+  //   // @ts-ignore
+  //   return 1 + spreadFootprint<Tuple1<T>>();
+  // }
+  // REQUIRES_DEEP_CLEAN_UP(): bool {
+  //   throw new Error('Method not implemented.');
+  // }
 }

@@ -11,7 +11,7 @@ import {
   pullSpread,
   pushPacked,
   pushSpread,
-  spreadFootprint,
+  // spreadFootprint,
   SpreadLayout,
 } from 'ask-lang';
 import { Option } from './option';
@@ -40,7 +40,7 @@ export class Result<O, E> implements SpreadLayout, PackedLayout {
   // @ts-ignore
   // @unsafe
   private constructor(
-    _isOk: bool,
+    _isOk: bool = false,
     _ok: Tuple1<O> = instantiateZero<Tuple1<O>>(),
     _err: Tuple1<E> = instantiateZero<Tuple1<E>>(),
   ) {
@@ -295,14 +295,14 @@ export class Result<O, E> implements SpreadLayout, PackedLayout {
     }
   }
 
-  @inline
-  FOOTPRINT(): u64 {
-    // @ts-ignore
-    return 1 + max(spreadFootprint<Tuple1<O>>(), spreadFootprint<Tuple1<O>>());
-  }
+  // @inline
+  // FOOTPRINT(): u64 {
+  //   // @ts-ignore
+  //   return 1 + max(spreadFootprint<Tuple1<O>>(), spreadFootprint<Tuple1<O>>());
+  // }
 
-  @inline
-  REQUIRES_DEEP_CLEAN_UP(): bool {
-    return true;
-  }
+  // @inline
+  // REQUIRES_DEEP_CLEAN_UP(): bool {
+  //   return true;
+  // }
 }

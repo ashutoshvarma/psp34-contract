@@ -126,16 +126,16 @@ export class List<T> implements SpreadLayout {
     this._elems.pushSpread<K>(key);
   }
 
-  @inline
-  FOOTPRINT(): u64 {
-    // 1 + len + map
-    return 3;
-  }
+  // @inline
+  // FOOTPRINT(): u64 {
+  //   // 1 + len + map
+  //   return 3;
+  // }
 
-  @inline
-  REQUIRES_DEEP_CLEAN_UP(): bool {
-    return true;
-  }
+  // @inline
+  // REQUIRES_DEEP_CLEAN_UP(): bool {
+  //   return true;
+  // }
 
   protected clearAll(): void {
     // if (this._elems.key() === null) {

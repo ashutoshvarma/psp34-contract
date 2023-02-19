@@ -15,9 +15,9 @@
         {
           "args": [],
           "docs": [],
-          "label": "default",
+          "label": "defualt",
           "payable": false,
-          "selector": "0xed4b9d1b"
+          "selector": "0xd6836735"
         }
       ],
       "messages": [
@@ -80,6 +80,12 @@
               "label": "id"
             }
           ],
+          "returnType": {
+            "type": 13,
+            "displayName": [
+              "Result<Empty, PSP34Error>"
+            ]
+          },
           "docs": [],
           "label": "mint",
           "selector": "0xcfdd9aa2"
@@ -116,6 +122,63 @@
           "docs": [],
           "label": "burn",
           "selector": "0xb1efc17b"
+        },
+        {
+          "mutates": false,
+          "payable": false,
+          "args": [
+            {
+              "type": {
+                "type": 9,
+                "displayName": [
+                  "AccountId"
+                ]
+              },
+              "label": "owner"
+            },
+            {
+              "type": {
+                "type": 4,
+                "displayName": [
+                  "u32"
+                ]
+              },
+              "label": "idx"
+            }
+          ],
+          "returnType": {
+            "type": 14,
+            "displayName": [
+              "Result<Id, PSP34Error>"
+            ]
+          },
+          "docs": [],
+          "label": "owners_token_by_index",
+          "selector": "0x6d8b2b4f"
+        },
+        {
+          "mutates": false,
+          "payable": false,
+          "args": [
+            {
+              "type": {
+                "type": 2,
+                "displayName": [
+                  "u128"
+                ]
+              },
+              "label": "idx"
+            }
+          ],
+          "returnType": {
+            "type": 14,
+            "displayName": [
+              "Result<Id, PSP34Error>"
+            ]
+          },
+          "docs": [],
+          "label": "token_by_index",
+          "selector": "0xcea2a4f3"
         },
         {
           "mutates": false,
@@ -170,7 +233,7 @@
             }
           ],
           "returnType": {
-            "type": 14,
+            "type": 15,
             "displayName": [
               "Option<AccountId>"
             ]
@@ -203,7 +266,7 @@
             },
             {
               "type": {
-                "type": 15,
+                "type": 16,
                 "displayName": [
                   "Option<Id>"
                 ]
@@ -212,7 +275,7 @@
             }
           ],
           "returnType": {
-            "type": 16,
+            "type": 17,
             "displayName": [
               "bool"
             ]
@@ -236,7 +299,7 @@
             },
             {
               "type": {
-                "type": 15,
+                "type": 16,
                 "displayName": [
                   "Option<Id>"
                 ]
@@ -245,7 +308,7 @@
             },
             {
               "type": {
-                "type": 16,
+                "type": 17,
                 "displayName": [
                   "bool"
                 ]
@@ -287,7 +350,7 @@
             },
             {
               "type": {
-                "type": 17,
+                "type": 18,
                 "displayName": [
                   "Uint8Array"
                 ]
@@ -343,7 +406,7 @@
             }
           ],
           "returnType": {
-            "type": 18,
+            "type": 19,
             "displayName": [
               "Option<Array<u8>>"
             ]
@@ -353,7 +416,117 @@
           "selector": "0x97f86da4"
         }
       ],
-      "events": [],
+      "events": [
+        {
+          "id": 1,
+          "label": "TransferEvent",
+          "args": [
+            {
+              "label": "from",
+              "indexed": false,
+              "type": {
+                "type": 15,
+                "displayName": [
+                  "Option<AccountId>"
+                ]
+              },
+              "docs": [
+                ""
+              ]
+            },
+            {
+              "label": "to",
+              "indexed": false,
+              "type": {
+                "type": 15,
+                "displayName": [
+                  "Option<AccountId>"
+                ]
+              },
+              "docs": [
+                ""
+              ]
+            },
+            {
+              "label": "id",
+              "indexed": false,
+              "type": {
+                "type": 6,
+                "displayName": [
+                  "Id"
+                ]
+              },
+              "docs": [
+                ""
+              ]
+            }
+          ],
+          "docs": [
+            ""
+          ]
+        },
+        {
+          "id": 2,
+          "label": "ApprovalEvent",
+          "args": [
+            {
+              "label": "from",
+              "indexed": false,
+              "type": {
+                "type": 9,
+                "displayName": [
+                  "AccountId"
+                ]
+              },
+              "docs": [
+                ""
+              ]
+            },
+            {
+              "label": "to",
+              "indexed": false,
+              "type": {
+                "type": 9,
+                "displayName": [
+                  "AccountId"
+                ]
+              },
+              "docs": [
+                ""
+              ]
+            },
+            {
+              "label": "id",
+              "indexed": false,
+              "type": {
+                "type": 16,
+                "displayName": [
+                  "Option<Id>"
+                ]
+              },
+              "docs": [
+                ""
+              ]
+            },
+            {
+              "label": "approved",
+              "indexed": false,
+              "type": {
+                "type": 17,
+                "displayName": [
+                  "bool"
+                ]
+              },
+              "docs": [
+                ""
+              ]
+            }
+          ],
+          "docs": [
+            ""
+          ]
+        }
+      ],
       "docs": [
         ""
       ]
@@ -630,6 +803,40 @@
             "variant": {
               "variants": [
                 {
+                  "name": "Err",
+                  "fields": [
+                    {
+                      "type": 11,
+                      "typeName": "~lib/psp34-contract/types/errors/PSP34Error"
+                    }
+                  ],
+                  "index": 1
+                },
+                {
+                  "name": "Ok",
+                  "fields": [
+                    {
+                      "type": 6,
+                      "typeName": "~lib/psp34-contract/types/id/Id"
+                    }
+                  ],
+                  "index": 0
+                }
+              ]
+            }
+          },
+          "path": [
+            "~lib/ask-common/result/Result<~lib/psp34-contract/types/id/Id,~lib/psp34-contract/types/errors/PSP34Error>"
+          ]
+        }
+      },
+      {
+        "id": 15,
+        "type": {
+          "def": {
+            "variant": {
+              "variants": [
+                {
                   "name": "Some",
                   "fields": [
                     {
@@ -652,7 +859,7 @@
         }
       },
       {
-        "id": 15,
+        "id": 16,
         "type": {
           "def": {
             "variant": {
@@ -680,7 +887,7 @@
         }
       },
       {
-        "id": 16,
+        "id": 17,
         "type": {
           "def": {
             "primitive": "bool"
@@ -688,7 +895,7 @@
         }
       },
       {
-        "id": 17,
+        "id": 18,
         "type": {
           "def": {
             "sequence": {
@@ -698,7 +905,7 @@
         }
       },
       {
-        "id": 18,
+        "id": 19,
         "type": {
           "def": {
             "variant": {

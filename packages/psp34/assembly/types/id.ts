@@ -318,24 +318,24 @@ export class Id implements SpreadLayout, PackedLayout {
     }
   }
 
-  FOOTPRINT(): u64 {
-    return (
-      1 + 2
-      // max(
-      //   lang.spreadFootprint<IdEnum>(),
-      //   lang.spreadFootprint<U8>(),
-      //   lang.spreadFootprint<U16>(),
-      //   lang.spreadFootprint<U32>(),
-      //   lang.spreadFootprint<U64>(),
-      //   lang.spreadFootprint<U128>(),
-      //   lang.spreadFootprint<Bytes>(),
-      // )
-    );
-  }
+  // FOOTPRINT(): u64 {
+  //   return (
+  //     1 + 2
+  //     // max(
+  //     //   lang.spreadFootprint<IdEnum>(),
+  //     //   lang.spreadFootprint<U8>(),
+  //     //   lang.spreadFootprint<U16>(),
+  //     //   lang.spreadFootprint<U32>(),
+  //     //   lang.spreadFootprint<U64>(),
+  //     //   lang.spreadFootprint<U128>(),
+  //     //   lang.spreadFootprint<Bytes>(),
+  //     // )
+  //   );
+  // }
 
-  REQUIRES_DEEP_CLEAN_UP(): bool {
-    return true;
-  }
+  // REQUIRES_DEEP_CLEAN_UP(): bool {
+  //   return true;
+  // }
 
   pullPacked<__K extends lang.IKey>(key: __K): void {
     // @ts-ignore
