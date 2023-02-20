@@ -4,15 +4,15 @@
 
 import {
   clearPacked,
-  clearSpread,
+  // clearSpread,
   IKey,
   PackedLayout,
   pullPacked,
   pullSpread,
   pushPacked,
-  pushSpread,
+  // pushSpread,
   // spreadFootprint,
-  SpreadLayout,
+  // SpreadLayout,
 } from 'ask-lang';
 import { Option } from './option';
 import { Tuple1 } from './tuple';
@@ -30,7 +30,7 @@ export type FlatMapErrFn<O, E, F> = MapFn<E, Result<O, F>>;
  */
 
 @enumeration()
-export class Result<O, E> implements SpreadLayout, PackedLayout {
+export class Result<O, E> implements PackedLayout {
   @variant({ name: 'Ok' })
   protected _ok: Tuple1<O>;
   @variant({ name: 'Err' })
@@ -271,29 +271,29 @@ export class Result<O, E> implements SpreadLayout, PackedLayout {
     }
   }
 
-  pushSpread<K extends IKey>(key: K): void {
-    // @ts-ignore
-    pushSpread<bool, K>(this._isOk, key);
-    if (this._isOk === true) {
-      // @ts-ignore
-      pushSpread<Tuple1<O>, K>(this._ok, key);
-    } else {
-      // @ts-ignore
-      pushSpread<Tuple1<E>, K>(this._err, key);
-    }
-  }
+  // pushSpread<K extends IKey>(key: K): void {
+  //   // @ts-ignore
+  //   pushSpread<bool, K>(this._isOk, key);
+  //   if (this._isOk === true) {
+  //     // @ts-ignore
+  //     pushSpread<Tuple1<O>, K>(this._ok, key);
+  //   } else {
+  //     // @ts-ignore
+  //     pushSpread<Tuple1<E>, K>(this._err, key);
+  //   }
+  // }
 
-  clearSpread<K extends IKey>(key: K): void {
-    // @ts-ignore
-    clearSpread<bool, K>(this._isOk, key);
-    if (this._isOk === true) {
-      // @ts-ignore
-      clearSpread<Tuple1<O>, K>(this._ok, key);
-    } else {
-      // @ts-ignore
-      clearSpread<Tuple1<E>, K>(this._err, key);
-    }
-  }
+  // clearSpread<K extends IKey>(key: K): void {
+  //   // @ts-ignore
+  //   clearSpread<bool, K>(this._isOk, key);
+  //   if (this._isOk === true) {
+  //     // @ts-ignore
+  //     clearSpread<Tuple1<O>, K>(this._ok, key);
+  //   } else {
+  //     // @ts-ignore
+  //     clearSpread<Tuple1<E>, K>(this._err, key);
+  //   }
+  // }
 
   // @inline
   // FOOTPRINT(): u64 {

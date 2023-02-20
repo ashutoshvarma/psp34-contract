@@ -5,15 +5,15 @@ import { instantiateZero, MapFn, RecoveryFn } from './util';
 import { Optionable } from 'as-container';
 import {
   clearPacked,
-  clearSpread,
+  // clearSpread,
   IKey,
   PackedLayout,
   pullPacked,
   pullSpread,
   pushPacked,
-  pushSpread,
+  // pushSpread,
   // spreadFootprint,
-  SpreadLayout,
+  // SpreadLayout,
 } from 'ask-lang';
 
 export type FlatMapFn<T, U> = MapFn<T, Option<U>>;
@@ -26,7 +26,7 @@ export type FlatMapFn<T, U> = MapFn<T, Option<U>>;
  */
 
 @enumeration()
-export class Option<T> implements Optionable<T>, SpreadLayout, PackedLayout {
+export class Option<T> implements Optionable<T>, PackedLayout {
   @variant({ name: 'None' })
   protected _isNone: bool;
   @variant({ name: 'Some' })
@@ -221,30 +221,30 @@ export class Option<T> implements Optionable<T>, SpreadLayout, PackedLayout {
     }
   }
 
-  pushSpread<K extends IKey>(key: K): void {
-    // @ts-ignore
-    pushSpread<bool, K>(this._isNone, key);
-    if (this._isNone) {
-      // @ts-ignore
-      // key.add(spreadFootprint<Tuple1<T>>());
-      ++key;
-    } else {
-      // @ts-ignore
-      pushSpread<Tuple1<T>, K>(this._val, key);
-    }
-  }
-  clearSpread<K extends IKey>(key: K): void {
-    // @ts-ignore
-    pushSpread<bool, K>(this._isNone, key);
-    if (this._isNone) {
-      // @ts-ignore
-      // key.add(spreadFootprint<Tuple1<T>>());
-      ++key;
-    } else {
-      // @ts-ignore
-      clearSpread<bool, K>(this._isNone, key);
-    }
-  }
+  // pushSpread<K extends IKey>(key: K): void {
+  //   // @ts-ignore
+  //   pushSpread<bool, K>(this._isNone, key);
+  //   if (this._isNone) {
+  //     // @ts-ignore
+  //     // key.add(spreadFootprint<Tuple1<T>>());
+  //     ++key;
+  //   } else {
+  //     // @ts-ignore
+  //     pushSpread<Tuple1<T>, K>(this._val, key);
+  //   }
+  // }
+  // clearSpread<K extends IKey>(key: K): void {
+  //   // @ts-ignore
+  //   pushSpread<bool, K>(this._isNone, key);
+  //   if (this._isNone) {
+  //     // @ts-ignore
+  //     // key.add(spreadFootprint<Tuple1<T>>());
+  //     ++key;
+  //   } else {
+  //     // @ts-ignore
+  //     clearSpread<bool, K>(this._isNone, key);
+  //   }
+  // }
 
   // @inline
   // FOOTPRINT(): u64 {
