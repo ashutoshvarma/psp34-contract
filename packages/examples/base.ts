@@ -1,6 +1,26 @@
-import { Empty, Result } from 'ask-common';
-import { AccountId } from 'ask-lang';
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+import { Empty, Option, Result } from 'ask-common';
+import { AccountId, env } from 'ask-lang';
 import { Balances, Id, PSP34, PSP34Error } from 'psp34-contract';
+
+@event({ id: 1 })
+class TransferEvent {
+  constructor(
+    public from: Option<AccountId>,
+    public to: Option<AccountId>,
+    public id: Id,
+  ) {}
+}
+
+@event({ id: 2 })
+class ApprovalEvent {
+  constructor(
+    public from: AccountId,
+    public to: AccountId,
+    public id: Option<Id>,
+    public approved: bool,
+  ) {}
+}
 
 @contract
 export class Contract extends PSP34<Balances> {
@@ -34,5 +54,26 @@ export class Contract extends PSP34<Balances> {
   @message({ mutates: true })
   burn(to: AccountId, id: Id): Result<Empty, PSP34Error> {
     return this._burn_from(to, id);
+  }
+
+  _emit_transfer_event(
+    _from: Option<AccountId>,
+    _to: Option<AccountId>,
+    _id: Id,
+  ): void {
+    // @ts-ignore
+    env().emitEvent(new TransferEvent(_from, _to, _id));
+  }
+
+  _emit_approval_event(
+    _from: AccountId,
+    _to: AccountId,
+    _id: Option<Id>,
+    _approved: bool,
+  ): void {
+    env().emitEvent(
+      // @ts-ignore
+      new ApprovalEvent(_from, _to, _id, _approved),
+    );
   }
 }
